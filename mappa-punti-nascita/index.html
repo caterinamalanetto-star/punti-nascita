@@ -200,7 +200,6 @@
       var svg = d3.select(host).insert("svg", ".r-tip").attr("width", W).attr("height", H).attr("role", "img")
         .attr("aria-label", "Mappa dei comuni italiani colorati per minuti di strada dal punto nascita più vicino. " +
           fmt(p45 / 1e6, 1) + " milioni di residenti sono a più di 45 minuti.");
-      svg.append("title").text("Minuti dal punto nascita più vicino, per comune");
       var g = svg.append("g");
       var com = g.append("g").attr("class", "com");
       var paths = com.selectAll("path").data(feats).join("path").attr("d", path);

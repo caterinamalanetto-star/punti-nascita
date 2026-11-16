@@ -108,7 +108,6 @@
           .attr("width", W).attr("height", H).attr("role", "img")
           .attr("aria-label", opts.label + ": da " + fmt(first[key]) + " nel " + first.year +
             " a " + fmt(last[key]) + " nel " + last.year + ".");
-        svg.append("title").text(opts.label + ", " + first.year + "-" + last.year);
         var g = svg.append("g").attr("transform", "translate(" + m.left + "," + m.top + ")");
 
         var grid = g.append("g").attr("class", "grid");
