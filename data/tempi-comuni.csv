@@ -7870,7 +7870,7 @@ id;Comune;Provincia;Regione;Residenti 2020;Area interna;Minuti 2010;Minuti 2024;
 118071;Villasor;CA;Sardegna;6636;C;25;25;31;31;31;30,4;San Gavino Monreale;San Gavino Monreale;Cagliari;Cagliari;Cagliari;117014;117014;118006;118006;118006;0;;
 118072;Villaspeciosa;CA;Sardegna;2549;C;27;27;27;27;27;23,4;Cagliari;Cagliari;Cagliari;Cagliari;Cagliari;118006;118006;118006;118006;118006;0;;
 119001;Buggerru;CI;Sardegna;1040;D;41;41;81;81;81;33,4;Iglesias;Iglesias;Cagliari;Cagliari;Cagliari;119009;119009;118006;118006;118006;0;;
-119002;Calasetta;CI;Sardegna;2803;D;33;54;83;83;83;49,2;Carbonia;Iglesias;Cagliari;Cagliari;Cagliari;119003;119009;118006;118006;118006;0;;sì
+119002;Calasetta;CI;Sardegna;2803;D;33;54;83;83;83;49,2;Carbonia;Iglesias;Cagliari;Cagliari;Cagliari;119003;119009;118006;118006;118006;0;;
 119003;Carbonia;CI;Sardegna;26672;A;0;27;56;56;56;24,5;Carbonia;Iglesias;Cagliari;Cagliari;Cagliari;119003;119009;118006;118006;118006;0;sì;
 119004;Carloforte;CI;Sardegna;5960;E;32;40;76;76;76;33,4;Carbonia;Iglesias;Cagliari;Cagliari;Cagliari;119003;119009;118006;118006;118006;0;;sì
 119005;Domusnovas;CI;Sardegna;5895;C;15;15;41;41;41;12,3;Iglesias;Iglesias;Cagliari;Cagliari;Cagliari;119009;119009;118006;118006;118006;0;;
@@ -7888,7 +7888,7 @@ id;Comune;Provincia;Regione;Residenti 2020;Area interna;Minuti 2010;Minuti 2024;
 119017;San Giovanni Suergiu;CI;Sardegna;5707;C;10;31;61;61;61;28,9;Carbonia;Iglesias;Cagliari;Cagliari;Cagliari;119003;119009;118006;118006;118006;0;;
 119018;Santadi;CI;Sardegna;3199;D;29;52;57;57;57;50,6;Carbonia;Iglesias;Cagliari;Cagliari;Cagliari;119003;119009;118006;118006;118006;0;;
 119019;Sant'Anna Arresi;CI;Sardegna;2644;C;27;48;67;67;67;47,8;Carbonia;Iglesias;Cagliari;Cagliari;Cagliari;119003;119009;118006;118006;118006;0;;
-119020;Sant'Antioco;CI;Sardegna;10767;C;19;40;69;69;69;38,3;Carbonia;Iglesias;Cagliari;Cagliari;Cagliari;119003;119009;118006;118006;118006;0;;sì
+119020;Sant'Antioco;CI;Sardegna;10767;C;19;40;69;69;69;38,3;Carbonia;Iglesias;Cagliari;Cagliari;Cagliari;119003;119009;118006;118006;118006;0;;
 119021;Tratalias;CI;Sardegna;993;C;18;38;64;64;64;36,0;Carbonia;Iglesias;Cagliari;Cagliari;Cagliari;119003;119009;118006;118006;118006;0;;
 119022;Villamassargia;CI;Sardegna;3427;C;16;16;41;41;41;12,4;Iglesias;Iglesias;Cagliari;Cagliari;Cagliari;119009;119009;118006;118006;118006;0;;
 119023;Villaperuccio;CI;Sardegna;1015;C;23;46;55;55;55;46,0;Carbonia;Iglesias;Cagliari;Cagliari;Cagliari;119003;119009;118006;118006;118006;0;;
