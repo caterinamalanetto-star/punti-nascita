@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dove non si nasce più – Radar QN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,700&display=swap">
+<link rel="stylesheet" href="../assets/radar.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="../assets/radar.js"></script>
+<style>
+  .ctl { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin: 22px 0 6px; }
+  .seg { display: inline-flex; border: 1px solid var(--grid); border-radius: 999px; padding: 2px; }
+  .seg button { font: inherit; font-size: 13px; color: var(--ink-2); background: none; border: 0; border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); font-weight: 600; }
+  .ctl select { font: inherit; font-size: 13px; color: var(--ink); background: var(--bg); border: 1px solid var(--grid); border-radius: 6px; padding: 5px 8px; }
+  .scn { font-size: 13px; color: var(--ink-2); margin: 4px 0 8px; min-height: 1.4em; }
+  .cl0 { fill: var(--grey-5); } .cl1 { fill: var(--blue-5); } .cl2 { fill: var(--blue-3); } .cl3 { fill: var(--red-3); } .cl4 { fill: var(--red-1); } .cln { fill: var(--grey-4); }
+  .com path { stroke-width: 0.35; stroke-linejoin: round; }
+  .com path.cl0 { stroke: var(--grey-5); } .com path.cl1 { stroke: var(--blue-5); } .com path.cl2 { stroke: var(--blue-3); } .com path.cl3 { stroke: var(--red-3); } .com path.cl4 { stroke: var(--red-1); } .com path.cln { stroke: var(--grey-4); }
+  .reg { fill: none; stroke: var(--bg); stroke-linejoin: round; }
+  .hl { fill: none; stroke: var(--ink); pointer-events: none; }
+  .pn { fill: var(--ink); stroke: var(--bg); pointer-events: none; }
+  .gone { fill: var(--bg); stroke: var(--ink); pointer-events: none; }
+  .sw--c0 { background: var(--grey-5); } .sw--c1 { background: var(--blue-5); } .sw--c2 { background: var(--blue-3); } .sw--c3 { background: var(--red-3); } .sw--c4 { background: var(--red-1); }
+  .sw--pn { background: var(--ink); border-radius: 50%; width: 7px; height: 7px; }
+  .sw--gone { border: 1.5px solid var(--ink); border-radius: 50%; width: 8px; height: 8px; background: var(--bg); }
+  #map svg { touch-action: manipulation; }
+</style>
+</head>
+<body>
+<main class="radar">
+  <header>
+    <h1 class="r-title">Per oltre un milione di persone la sala parto è a più di 45 minuti</h1>
+    <p class="r-sub">Minuti di strada dal centro di ogni comune al punto nascita più vicino</p>
+  </header>
+
+  <div class="r-big" id="big" aria-hidden="true">
+    <span><span class="r-big__num" id="big-num">&nbsp;</span> <span class="r-big__unit">mln</span></span>
+    <span class="r-big__label" id="big-label"></span>
+  </div>
+
+  <div class="ctl">
+    <div class="seg" role="group" aria-label="Scenario">
+      <button type="button" data-s="t24" aria-pressed="true">Oggi</button>
+      <button type="button" data-s="t500" aria-pressed="false">Soglia 500 parti</button>
+      <button type="button" data-s="t10" aria-pressed="false">2010</button>
+    </div>
+    <select id="zoom" aria-label="Zoom su una regione"><option value="">Tutta Italia</option></select>
+  </div>
+  <p class="scn" id="scn"></p>
+
+  <figure class="r-chart" id="map" style="margin:0"></figure>
+
+  <div class="r-key" id="key">
+    <span><i class="sw sw--c0"></i>Fino a 15 min</span>
+    <span><i class="sw sw--c1"></i>16-30</span>
+    <span><i class="sw sw--c2"></i>31-45</span>
+    <span><i class="sw sw--c3"></i>46-60</span>
+    <span><i class="sw sw--c4"></i>Oltre 60</span>
+    <span><i class="sw sw--pn"></i><span id="k-pn">Punto nascita</span></span>
+    <span id="k-gone-w"><i class="sw sw--gone"></i><span id="k-gone"></span></span>
+  </div>
+
+  <p class="r-note" id="note"></p>
+
+  <footer class="r-foot">
+    <span>Fonte: Agenas (PNE, parti 2024), Istat (matrici delle distanze, confini 2026), ministero della Salute (posti letto 2010), Mappa aree interne 2020</span>
+    <span>Elaborazione Radar – QN</span>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var R = Radar, fmt = R.fmt;
+  var CL = [15, 30, 45, 60];
+  function cls(m) { return m == null ? "cln" : m <= CL[0] ? "cl0" : m <= CL[1] ? "cl1" : m <= CL[2] ? "cl2" : m <= CL[3] ? "cl3" : "cl4"; }
+
+  Promise.all([
+    d3.json("../data/comuni.json"), d3.json("../data/regioni.json"),
+    R.loadCSV("../data/tempi-comuni.csv"), R.loadCSV("../data/punti-nascita-2024.csv")
+  ]).then(function (res) {
+    var GC = res[0], GR = res[1];
+    var byId = new Map();
+    res[2].forEach(function (r) {
+      byId.set(r["id"], {
+        id: r["id"], name: r["Comune"], prov: r["Provincia"], reg: r["Regione"], pop: R.num(r["Residenti 2020"]),
+        t10: R.num(r["Minuti 2010"]), t24: R.num(r["Minuti 2024"]), t500: R.num(r["Minuti soglia 500"]),
+        km: R.num(r["Km 2024"]), d24: r["id punto nascita 2024"], d500: r["id punto nascita soglia 500"],
+        n24: r["Comune del punto nascita 2024"], n500: r["Comune del punto nascita soglia 500"],
+        parti: R.num(r["Parti nel comune 2024"]) || 0, gone: r["Reparto chiuso"] === "sì", isola: r["Isola minore"] === "sì"
+      });
+    });
+    // parti massimi per struttura nel comune (per la soglia 500)
+    var maxStr = new Map();
+    res[3].forEach(function (r) {
+      if (r["Considerato punto nascita"] !== "sì") return;
+      var v = R.num(r["Parti 2024"]); maxStr.set(r["id"], Math.max(maxStr.get(r["id"]) || 0, v));
+    });
+
+    function decode(g) {
+      return g.map(function (ring) {
+        var out = [], x = 0, y = 0;
+        for (var i = 0; i < ring.length; i += 2) { x += ring[i]; y += ring[i + 1]; out.push([x, y]); }
+        return out;
+      });
+    }
+    var feats = GC.f.map(function (f) { return { type: "Feature", id: f.id, r: f.r, d: byId.get(f.id), geometry: { type: "Polygon", coordinates: decode(f.g) } }; });
+    var regs = GR.f.map(function (f) { return { type: "Feature", id: +f.id, geometry: { type: "Polygon", coordinates: decode(f.g) } }; });
+    // polygon multi-anello: d3 tratta il 1° anello come esterno; uso MultiPolygon per anelli separati
+    function toMulti(f) {
+      var rings = f.geometry.coordinates;
+      if (rings.length < 2) return f;
+      f.geometry = { type: "MultiPolygon", coordinates: groupRings(rings) };
+      return f;
+    }
+    function area(r) { var a = 0; for (var i = 0, n = r.length; i < n; i++) { var p = r[i], q = r[(i + 1) % n]; a += p[0] * q[1] - q[0] * p[1]; } return a / 2; }
+    function groupRings(rings) {
+      // nello shapefile: esterni in senso orario (area < 0), buchi antiorari (area > 0)
+      var polys = [];
+      rings.forEach(function (r) { if (area(r) <= 0 || !polys.length) polys.push([r]); else polys[polys.length - 1].push(r); });
+      return polys;
+    }
+    feats.forEach(toMulti); regs.forEach(toMulti);
+
+    // nomi regioni dai comuni
+    var regName = new Map();
+    feats.forEach(function (f) { if (f.d && !regName.has(+f.r)) regName.set(+f.r, f.d.reg.split("/")[0]); });
+    var sel = d3.select("#zoom");
+    regs.slice().sort(function (a, b) { return d3.ascending(regName.get(a.id), regName.get(b.id)); })
+      .forEach(function (r) { sel.append("option").attr("value", r.id).text(regName.get(r.id)); });
+
+    var scen = "t24", zoomReg = "";
+    var SC = {
+      t24: { lab: "Punti nascita attivi nel 2024 (almeno 10 parti l'anno).", pn: "Punto nascita 2024", gone: "Reparto di ostetricia nel 2010, oggi nessun punto nascita" },
+      t500: { lab: "Se restassero aperti solo i punti nascita con almeno 500 parti l'anno, la soglia dell'accordo Stato-Regioni del 2010.", pn: "Punto nascita con almeno 500 parti", gone: "Punto nascita sotto i 500 parti" },
+      t10: { lab: "Reparti di ostetricia e ginecologia attivi nel 2010 (non tutti facevano parti: il dato sottostima le distanze di allora).", pn: "Reparto di ostetricia 2010", gone: null }
+    };
+    function isPN(d, s) { return d && (s === "t500" ? (maxStr.get(d.id) || 0) >= 500 : d[s] === 0); }
+    function isGone(d, s) {
+      if (!d) return false;
+      if (s === "t24") return d.gone;
+      if (s === "t500") return d.t24 === 0 && !isPN(d, "t500");
+      return false;
+    }
+
+    // big number
+    function popOver(key, th) { var s = 0; byId.forEach(function (d) { if (d[key] > th) s += d.pop; }); return s; }
+    var p45 = popOver("t24", 45), p45s = popOver("t500", 45), p45o = popOver("t10", 45);
+    var bigNum = d3.select("#big-num"), bigFmt = function (v) { return fmt(v / 1e6, 1); };
+    d3.select("#big-label").text("residenti a più di 45 minuti dal punto nascita più vicino. Sarebbero " +
+      fmt(p45s / 1e6, 1) + " milioni con i soli punti nascita sopra i 500 parti");
+    if (R.reduced) bigNum.text(bigFmt(p45)); else { bigNum.text(bigFmt(0)); R.onFirstView(document.getElementById("big"), function () { R.countUp(bigNum, p45, bigFmt, "play"); }); }
+
+    var nGone = 0; byId.forEach(function (d) { if (d.gone) nGone++; });
+    var p30 = popOver("t24", 30);
+    d3.select("#note").text("Tempi stradali Istat tra il centro di ogni comune e quello del comune con il punto nascita: per chi vive vicino a una grande città la distanza reale può essere minore. " +
+      "Nel 2024 i residenti a più di mezz'ora sono " + fmt(p30 / 1e6, 1) + " milioni; i comuni che avevano un reparto di ostetricia nel 2010 e oggi non hanno un punto nascita sono " + fmt(nGone) + ". " +
+      "Sono esclusi gli ospedali con meno di 10 parti l'anno. Per le isole minori il tempo comprende il traghetto.");
+
+    var host = document.getElementById("map");
+    var tip = R.tooltip(host);
+    var paint = function () {}, clearHl = function () {};
+    R.dismissOutside(host, function () { tip.hide(); clearHl(); });
+
+    function updateText() {
+      d3.select("#scn").text(SC[scen].lab);
+      d3.select("#k-pn").text(SC[scen].pn);
+      d3.select("#k-gone-w").style("display", SC[scen].gone ? null : "none");
+      d3.select("#k-gone").text(SC[scen].gone || "");
+    }
+    updateText();
+
+    R.responsive(host, function (W, phase) {
+      var narrow = R.isNarrow(W);
+      var proj = d3.geoIdentity().reflectY(true);
+      var italy = { type: "FeatureCollection", features: regs };
+      proj.fitWidth(W, italy);
+      var path0 = d3.geoPath(proj);
+      var b = path0.bounds(italy), H = Math.ceil(b[1][1] - b[0][1]);
+      var maxH = narrow ? 460 : 780;
+      if (H > maxH) { proj.fitSize([W, maxH], italy); H = maxH; }
+      var path = d3.geoPath(proj);
+
+      d3.select(host).select("svg").remove();
+      var svg = d3.select(host).insert("svg", ".r-tip").attr("width", W).attr("height", H).attr("role", "img")
+        .attr("aria-label", "Mappa dei comuni italiani colorati per minuti di strada dal punto nascita più vicino. " +
+          fmt(p45 / 1e6, 1) + " milioni di residenti sono a più di 45 minuti.");
+      svg.append("title").text("Minuti dal punto nascita più vicino, per comune");
+      var g = svg.append("g");
+      var com = g.append("g").attr("class", "com");
+      var paths = com.selectAll("path").data(feats).join("path").attr("d", path);
+      var regL = g.append("path").datum({ type: "FeatureCollection", features: regs }).attr("class", "reg").attr("d", path);
+      var hl = g.append("path").attr("class", "hl");
+      var cen = new Map(); feats.forEach(function (f) { cen.set(f.id, path.centroid(f)); });
+      var mk = g.append("g");
+
+      var k = 1;
+      function sizes() {
+        regL.attr("stroke-width", 0.9 / k); hl.attr("stroke-width", 2 / k);
+        mk.selectAll(".pn").attr("r", (narrow ? 1.5 : 1.9) / Math.sqrt(k) / Math.sqrt(k) * Math.min(Math.sqrt(k), 2.2)).attr("stroke-width", 0.5 / k);
+        mk.selectAll(".gone").attr("r", (narrow ? 1.7 : 2.2) / k * Math.min(Math.sqrt(k), 2.2)).attr("stroke-width", 1 / k);
+      }
+      paint = function (animate) {
+        paths.attr("class", function (f) { return cls(f.d ? f.d[scen] : null); });
+        var pts = feats.filter(function (f) { return isPN(f.d, scen); });
+        var gone = feats.filter(function (f) { return isGone(f.d, scen); });
+        mk.selectAll(".gone").data(gone, function (f) { return f.id; }).join("circle").attr("class", "gone")
+          .attr("cx", function (f) { return cen.get(f.id)[0]; }).attr("cy", function (f) { return cen.get(f.id)[1]; });
+        mk.selectAll(".pn").data(pts, function (f) { return f.id; }).join("circle").attr("class", "pn")
+          .attr("cx", function (f) { return cen.get(f.id)[0]; }).attr("cy", function (f) { return cen.get(f.id)[1]; });
+        mk.selectAll(".gone").raise();
+        sizes();
+      };
+      paint();
+      R.enter(g, phase, function (s) { s.style("opacity", 0); }, function (s) { s.style("opacity", 1); });
+
+      function zoomTo(id, anim) {
+        var t;
+        if (!id) { k = 1; t = d3.zoomIdentity; }
+        else {
+          var f = regs.find(function (r) { return r.id === +id; });
+          var bb = path.bounds(f), pad = 16;
+          k = Math.min((W - 2 * pad) / (bb[1][0] - bb[0][0]), (H - 2 * pad) / (bb[1][1] - bb[0][1]), 14);
+          var cx = (bb[0][0] + bb[1][0]) / 2, cy = (bb[0][1] + bb[1][1]) / 2;
+          t = d3.zoomIdentity.translate(W / 2 - k * cx, H / 2 - k * cy).scale(k);
+        }
+        tip.hide(); hl.attr("d", null);
+        (anim && !R.reduced ? g.transition().duration(600).ease(d3.easeCubicInOut) : g).attr("transform", t.toString());
+        sizes();
+      }
+      zoomTo(zoomReg, false);
+      sel.on("change", function () { zoomReg = this.value; zoomTo(zoomReg, true); });
+
+      function show(ev, f) {
+        var d = f.d; if (!d) { tip.hide(); return; }
+        hl.attr("d", path(f));
+        var m = d[scen];
+        var dest = scen === "t500" ? d.n500 : (scen === "t24" ? d.n24 : null);
+        var rows = [];
+        if (m !== 0 && dest) rows.push(["Punto nascita più vicino", dest]);
+        var fm = function (v) { return v === 0 ? "nel comune" : fmt(v) + " min"; };
+        rows.push(["Oggi", fm(d.t24)]);
+        rows.push(["Soglia 500 parti", fm(d.t500)]);
+        rows.push(["Nel 2010", fm(d.t10)]);
+        var note = [];
+        if (d.parti) note.push("Nel comune " + fmt(d.parti) + " parti nel 2024.");
+        if (d.gone) note.push("Aveva un reparto di ostetricia e ginecologia nel 2010.");
+        if (d.isola) note.push("Isola minore: il tempo comprende il traghetto.");
+        var pt = d3.pointer(ev, host);
+        tip.show(R.tipHTML({ title: d.name + " (" + d.prov + ")", value: fmt(m), unit: "minuti", rows: rows, note: note.join(" ") || null }), pt[0], pt[1]);
+      }
+      clearHl = function () { hl.attr("d", null); };
+      com.on("pointermove pointerdown", function (ev) { var f = ev.target.__data__; if (f) show(ev, f); })
+        .on("pointerleave", function (ev) { if (ev.pointerType === "mouse") { tip.hide(); clearHl(); } });
+    });
+
+    d3.selectAll(".seg button").on("click", function () {
+      scen = this.getAttribute("data-s");
+      d3.selectAll(".seg button").attr("aria-pressed", function () { return this.getAttribute("data-s") === scen ? "true" : "false"; });
+      updateText(); tip.hide(); clearHl(); paint();
+    });
+  }).catch(function (e) { R.fail("#map", e); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,407 @@
+Struttura;Provincia;Comune;Regione;id;Parti 2024;Considerato punto nascita
+Osp.Civile Ss.Antonio E Biagio;AL;Alessandria;Piemonte;006003;997;sì
+Ospedale Ostetrico Ginecologico Sant'anna;TO;Torino;Piemonte;001272;5666;sì
+Presidio Osped. Riunito Sede Di Cirie';TO;Cirie';Piemonte;001086;587;sì
+Ospedale Civico Chivasso;TO;Chivasso;Piemonte;001082;593;sì
+Osp. Maggiore Della Carita';NO;Novara;Piemonte;003106;1845;sì
+Ospedale Civile Di Ivrea;TO;Ivrea;Piemonte;001125;551;sì
+Ospedale Martini;TO;Torino;Piemonte;001272;1003;sì
+Az. Ospedal. S. Croce E Carle;CN;Cuneo;Piemonte;004078;1730;sì
+Ospedale Di Mondovi';CN;Mondovi';Piemonte;004130;550;sì
+Ospedale Di Savigliano;CN;Savigliano;Piemonte;004215;513;sì
+Ospedale Civile  E.Agnelli;TO;Pinerolo;Piemonte;001191;666;sì
+Istituto S.S. Trinita';NO;Borgomanero;Piemonte;003024;842;sì
+Ospedale San Giacomo;AL;Novi Ligure;Piemonte;006114;445;sì
+Ospedale Santa Croce;TO;Moncalieri;Piemonte;001156;933;sì
+Ospedale Degli Infermi;TO;Rivoli;Piemonte;001219;812;sì
+Presidio Osp. Cardinal G. Massaia;AT;Asti;Piemonte;005005;1151;sì
+Ospedale Sant'andrea;VC;Vercelli;Piemonte;002158;392;sì
+Ospedale San Biagio;VB;Domodossola;Piemonte;103028;75;sì
+Ospedale Mauriziano Umberto I;TO;Torino;Piemonte;001272;1193;sì
+Ospedale Michele E Pietro Ferrero;CN;Verduno;Piemonte;004238;822;sì
+Ospedale Maggiore;TO;Chieri;Piemonte;001078;390;sì
+Azienda Ospedaliero Universitaria S.Luigi;TO;Orbassano;Piemonte;001171;1;no (meno di 10 parti)
+Ospedale San Giovanni Battista Molinette;TO;Torino;Piemonte;001272;2;no (meno di 10 parti)
+Stabilimento Ospedaliero Castelli;VB;Verbania;Piemonte;103072;427;sì
+Ospedale Degli Infermi;BI;Ponderano;Piemonte;096047;751;sì
+Ospedale Maria Vittoria;TO;Torino;Piemonte;001272;1229;sì
+Ospedale Santo Spirito;AL;Casale Monferrato;Piemonte;006039;252;sì
+Ospedale Regionale Umberto Parini;AO;Aosta;Valle d'Aosta/Vallée d'Aoste;007003;612;sì
+Ospedale G. Fornaroli;MI;Magenta;Lombardia;015130;1032;sì
+Ospedale Valcamonica;BS;Esine;Lombardia;017070;668;sì
+Irccs S. Raffaele;MI;Milano;Lombardia;015146;2129;sì
+Ospedale S. Giuseppe;MI;Milano;Lombardia;015146;1136;sì
+Presidio Ospedaliero Di Vimercate;MB;Vimercate;Lombardia;108050;1020;sì
+Presidio Ospedaliero Di Chiari;BS;Chiari;Lombardia;017052;643;sì
+Ospedale C. Poma;MN;Mantova;Lombardia;020030;1474;sì
+Pres.Ospedal.Spedali Civili;BS;Brescia;Lombardia;017029;3289;sì
+Ospedale Sondrio;SO;Sondrio;Lombardia;014061;444;sì
+Presidio Ospedaliero Di Carate;MB;Carate Brianza;Lombardia;108015;939;sì
+Ospedale Di  Vizzolo Predabissi;MI;Vizzolo Predabissi;Lombardia;015244;613;sì
+Ospedale Di Circolo A. Manzoni;LC;Lecco;Lombardia;097042;1897;sì
+Casa Di Cura S. Pio X;MI;Milano;Lombardia;015146;879;sì
+Fondazione Poliambulanza;BS;Brescia;Lombardia;017029;2654;sì
+Ospedale Di Cremona;CR;Cremona;Lombardia;019036;1117;sì
+Ospedale Civile Di Legnano;MI;Legnano;Lombardia;015118;1042;sì
+Ospedale Valduce;CO;Como;Lombardia;013075;1014;sì
+Ospedale Civile La Memoria Di Gavardo;BS;Gavardo;Lombardia;017077;103;sì
+Osp.Sacra Famiglia - F.B.F.;CO;Erba;Lombardia;013095;407;sì
+Osp. Moriggia Pelascini;CO;Gravedona Ed Uniti;Lombardia;013249;297;sì
+P.O.  Citta' Di Sesto S. Giovanni;MI;Sesto San Giovanni;Lombardia;015209;595;sì
+Ospedale Di Circolo;VA;Busto Arsizio;Lombardia;012026;758;sì
+Ospedale Di Desenzano;BS;Desenzano Del Garda;Lombardia;017067;602;sì
+Osp.Civile Destra Secchia;MN;Borgo Mantovano;Lombardia;020072;447;sì
+Ospedale G.Salvini;MI;Garbagnate Milanese;Lombardia;015105;752;sì
+Ospedale Papa Giovanni Xxiii;BG;Bergamo;Lombardia;016024;4053;sì
+Fondaz.Irccs Ca' Granda - Ospedale Maggiore;MI;Milano;Lombardia;015146;6016;sì
+Policlinico San Pietro;BG;Ponte San Pietro;Lombardia;016170;259;sì
+Ospedale S. Carlo Borromeo;MI;Milano;Lombardia;015146;560;sì
+Ospedale Di Manerbio;BS;Manerbio;Lombardia;017103;699;sì
+Ospedale S. Paolo;MI;Milano;Lombardia;015146;1143;sì
+Ospedale F. Del Ponte;VA;Varese;Lombardia;012133;2741;sì
+Ospedale S. Maria Delle Stelle;MI;Melzo;Lombardia;015142;550;sì
+Ospedale M. Melloni;MI;Milano;Lombardia;015146;1727;sì
+Ospedale L. Sacco;MI;Milano;Lombardia;015146;2;no (meno di 10 parti)
+Osped.Circolo Causa Pia Luvini;VA;Cittiglio;Lombardia;012051;481;sì
+Ospedale Bolognini;BG;Seriate;Lombardia;016198;1913;sì
+Osp. S. Antonio Abate;VA;Gallarate;Lombardia;012070;605;sì
+Ospedale Ca' Granda-Niguarda;MI;Milano;Lombardia;015146;1945;sì
+Presidio Osped. V. Buzzi;MI;Milano;Lombardia;015146;3382;sì
+Casa Di Cura Le Betulle;CO;Appiano Gentile;Lombardia;013010;1;no (meno di 10 parti)
+Policlinico S. Matteo;PV;Pavia;Lombardia;018110;2036;sì
+Ospedale Civile;PV;Vigevano;Lombardia;018177;459;sì
+Ospedale Di Treviglio E Caravaggio;BG;Treviglio;Lombardia;016219;929;sì
+Presidio Ospedaliero Di Desio;MB;Desio;Lombardia;108023;1017;sì
+Fondazione Irccs San Gerardo Dei Tintori;MB;Monza;Lombardia;108033;2521;sì
+Ospedale Morelli;SO;Sondalo;Lombardia;014060;237;sì
+Ospedale S. Anna;CO;San Fermo Della Battaglia;Lombardia;013206;1809;sì
+Ospedale Maggiore;CR;Crema;Lombardia;019035;642;sì
+Ospedale Di Circolo S.L.Mandic;LC;Merate;Lombardia;097048;2;no (meno di 10 parti)
+Ospedale Maggiore Di Lodi;LO;Lodi;Lombardia;098031;1057;sì
+Istituto Clinico  S. Anna;BS;Brescia;Lombardia;017029;535;sì
+Ospedale Civile;PV;Voghera;Lombardia;018182;553;sì
+Ospedale Di Circolo;MI;Rho;Lombardia;015182;765;sì
+Ospedale Galmarini;VA;Tradate;Lombardia;012127;514;sì
+Ospedale Di Base Di Vipiteno;BZ;Vipiteno;Trentino-Alto Adige/Südtirol;021115;1;no (meno di 10 parti)
+Ospedale Centrale Di Bolzano;BZ;Bolzano;Trentino-Alto Adige/Südtirol;021008;1553;sì
+Ospedale Aziendale Di Merano;BZ;Merano;Trentino-Alto Adige/Südtirol;021051;1207;sì
+Ospedale Aziendale Di Bressanone;BZ;Bressanone;Trentino-Alto Adige/Südtirol;021011;885;sì
+Ospedale Di Base Di Silandro;BZ;Silandro;Trentino-Alto Adige/Südtirol;021093;289;sì
+Ospedale Aziendale Di Brunico;BZ;Brunico;Trentino-Alto Adige/Südtirol;021013;722;sì
+Presidio Ospedaliero Di Cavalese;TN;Cavalese;Trentino-Alto Adige/Südtirol;022050;174;sì
+Presidio Ospedaliero S. Chiara;TN;Trento;Trentino-Alto Adige/Südtirol;022205;2316;sì
+Presidio Ospedaliero Di Cles;TN;Cles;Trentino-Alto Adige/Südtirol;022062;182;sì
+Ospedale Di Rovereto;TN;Rovereto;Trentino-Alto Adige/Südtirol;022161;939;sì
+Azienda Ospedale - Universita' Padova;PD;Padova;Veneto;028060;2941;sì
+Casa Di Cura Pederzoli;VR;Peschiera Del Garda;Veneto;023059;1211;sì
+Ospedale Di Schiavonia;PD;Monselice;Veneto;028055;902;sì
+Ospedale Di San Dona' Di Piave;VE;San Dona' Di Piave;Veneto;027033;520;sì
+Ospedale Di Camposampiero;PD;Camposampiero;Veneto;028019;1325;sì
+Casa Di Cura Abano Terme;PD;Abano Terme;Veneto;028001;584;sì
+Ospedale Di Asiago;VI;Asiago;Veneto;024009;66;sì
+Ospedale Di Rovigo;RO;Rovigo;Veneto;029041;419;sì
+Ospedale Di Venezia;VE;Venezia;Veneto;027042;280;sì
+Ospedale Di Mestre;VE;Venezia;Veneto;027042;1741;sì
+Ospedale Di Cittadella;PD;Cittadella;Veneto;028032;871;sì
+Ospedale Di  Treviso;TV;Treviso;Veneto;026086;2289;sì
+Ospedale Di  Conegliano;TV;Conegliano;Veneto;026021;786;sì
+Ospedale Di Legnago;VR;Legnago;Veneto;023044;736;sì
+Ospedale Di Montebelluna;TV;Montebelluna;Veneto;026046;909;sì
+Ospedale Di Portogruaro;VE;Portogruaro;Veneto;027029;285;sì
+Ospedale Di Mirano;VE;Mirano;Veneto;027024;875;sì
+Ospedale Sacro Cuore Don Calabria;VR;Negrar;Veneto;023052;821;sì
+Ospedale Di  Belluno;BL;Belluno;Veneto;025006;490;sì
+Ospedale Di  Oderzo;TV;Oderzo;Veneto;026051;532;sì
+Ospedale Di Arzignano;VI;Arzignano;Veneto;024008;530;sì
+Ospedale Di Valdagno;VI;Valdagno;Veneto;024111;255;sì
+Ospedale Di Chioggia;VE;Chioggia;Veneto;027008;434;sì
+Ospedale Di Vicenza;VI;Vicenza;Veneto;024116;2255;sì
+Ospedale Di Santorso;VI;Santorso;Veneto;024095;1466;sì
+Ospedale Di Bassano;VI;Bassano Del Grappa;Veneto;024012;1015;sì
+Ospedale Di Castelfranco;TV;Castelfranco Veneto;Veneto;026012;382;sì
+Ospedale Di San Bonifacio;VR;San Bonifacio;Veneto;023069;1218;sì
+Ospedale Di Villafranca;VR;Villafranca Di Verona;Veneto;023096;594;sì
+Ospedale Di  Feltre;BL;Feltre;Veneto;025021;736;sì
+Ospedale Di Adria;RO;Adria;Veneto;029001;232;sì
+Aoui Verona Borgo Trento;VR;Verona;Veneto;023091;2155;sì
+Sede Di San Daniele;UD;San Daniele Del Friuli;Friuli-Venezia Giulia;030099;733;sì
+Presidio Ospedaliero Smm - Sede Udine;UD;Udine;Friuli-Venezia Giulia;030129;1624;sì
+Irccs  Burlo Garofolo;TS;Trieste;Friuli-Venezia Giulia;032006;1466;sì
+Sede Di Tolmezzo;UD;Tolmezzo;Friuli-Venezia Giulia;030121;300;sì
+Casa Di Cura Privata  S.Giorgio  Spa;PN;Pordenone;Friuli-Venezia Giulia;093033;704;sì
+Po Gorizia E Monfalcone Sede Monfalcone;GO;Monfalcone;Friuli-Venezia Giulia;031012;779;sì
+Po Latisana E Palmanova Sede Latisana;UD;Latisana;Friuli-Venezia Giulia;030046;453;sì
+Presidio Ospedaliero Santa Maria Degli Angeli;PN;Pordenone;Friuli-Venezia Giulia;093033;1336;sì
+Ospedale San Paolo;SV;Savona;Liguria;009056;836;sì
+Istituto Giannina Gaslini - Sede Imperia;IM;Imperia;Liguria;008031;3;no (meno di 10 parti)
+Istituto Giannina Gaslini - Sede Savona;SV;Savona;Liguria;009056;1;no (meno di 10 parti)
+Stabilimento Ospedaliero Di Imperia;IM;Imperia;Liguria;008031;784;sì
+Osp. Riuniti Leonardi E Riboli;GE;Lavagna;Liguria;010028;531;sì
+Irccs Ospedale Policlinico San Martino;GE;Genova;Liguria;010025;1541;sì
+Ospedale Sant'andrea;SP;La Spezia;Liguria;011015;729;sì
+Evangelico-San Carlo Voltri;GE;Genova;Liguria;010025;552;sì
+Casa Di Cura Villa Montallegro;GE;Genova;Liguria;010025;1;no (meno di 10 parti)
+Ospedale Villa Scassi;GE;Genova;Liguria;010025;602;sì
+E.O. Ospedali Galliera;GE;Genova;Liguria;010025;794;sì
+Ist.G.Gaslini;GE;Genova;Liguria;010025;1300;sì
+Stabilimento Ospedaliero Di Sanremo;IM;Sanremo;Liguria;008055;378;sì
+Ospedale  E.Franchini;RE;Montecchio Emilia;Emilia-Romagna;035027;385;sì
+Ospedale Maggiore  C.A. Pizzardi;BO;Bologna;Emilia-Romagna;037006;2884;sì
+Ospedale  Maurizio Bufalini;FC;Cesena;Emilia-Romagna;040007;1650;sì
+Ospedale  Guglielmo Da Saliceto;PC;Piacenza;Emilia-Romagna;033032;1864;sì
+Ospedale Civile Nuovo  S.Maria Della Scaletta;BO;Imola;Emilia-Romagna;037032;762;sì
+Arcispedale Santa Maria Nuova;RE;Reggio Nell'emilia;Emilia-Romagna;035033;2554;sì
+Ospedale Bentivoglio;BO;Bentivoglio;Emilia-Romagna;037005;908;sì
+Ospedale  Infermi;RN;Rimini;Emilia-Romagna;099014;2356;sì
+Ospedale  Morgagni-Pierantoni;FC;Forli';Emilia-Romagna;040012;935;sì
+Ospedale Fidenza;PR;Fidenza;Emilia-Romagna;034014;799;sì
+Ospedale  Degli Infermi;RA;Faenza;Emilia-Romagna;039010;334;sì
+Irccs Policlinico S. Orsola;BO;Bologna;Emilia-Romagna;037006;2396;sì
+Casa Di Cura Citta' Di Parma;PR;Parma;Emilia-Romagna;034027;1;no (meno di 10 parti)
+Nuovo Ospedale Civile Di Sassuolo Spa;MO;Sassuolo;Emilia-Romagna;036040;1199;sì
+Ospedale   B. Ramazzini;MO;Carpi;Emilia-Romagna;036005;1050;sì
+Ospedale  Santa Maria Delle Croci;RA;Ravenna;Emilia-Romagna;039014;1408;sì
+Azienda Ospedaliero-Universitaria;MO;Modena;Emilia-Romagna;036023;2909;sì
+Azienda Ospedaliero-Universitaria;FE;Ferrara;Emilia-Romagna;038008;1594;sì
+Azienda Ospedaliero-Universitaria;PR;Parma;Emilia-Romagna;034027;2479;sì
+Stabilimento Ospedaliero San Francesco;LU;Barga;Toscana;046003;175;sì
+Azienda Ospedaliero-Universitaria Pisana;PI;Pisa;Toscana;050026;1724;sì
+Ospedale Civile Di Cecina;LI;Cecina;Toscana;049007;559;sì
+Ospedale Versilia;LU;Camaiore;Toscana;046005;909;sì
+Presidio Ospedaliero Zona Delle Apuane;MS;Carrara;Toscana;045003;1233;sì
+Ospedale Livorno;LI;Livorno;Toscana;049009;820;sì
+Ospedale Dell Alta Val D Elsa;SI;Poggibonsi;Toscana;052022;472;sì
+Nuovo Ospedale Di Prato S.Stefano;PO;Prato;Toscana;100005;1721;sì
+Osp. S. Giovanni Di Dio Torregalli;FI;Firenze;Toscana;048017;1339;sì
+Casa Di Cura Privata San Rossore Srl;PI;Pisa;Toscana;050026;6;no (meno di 10 parti)
+Ospedale S.M.Annunziata;FI;Bagno A Ripoli;Toscana;048001;867;sì
+Ospedale Di Portoferraio;LI;Portoferraio;Toscana;049014;129;sì
+Ospedali Riuniti Della Val Di Chiana;SI;Montepulciano;Toscana;052015;437;sì
+Presidio Ospedaliero San Luca;LU;Lucca;Toscana;046017;868;sì
+Azienda Ospedaliera Universitaria Senese;SI;Siena;Toscana;052032;932;sì
+Ospedale San Jacopo;PT;Pistoia;Toscana;047014;1073;sì
+Ospedale Nuovo Valdarno;AR;Montevarchi;Toscana;051026;484;sì
+Az. Ospedaliero - Universitaria Careggi;FI;Firenze;Toscana;048017;3120;sì
+Ospedale Area Aretina Nord;AR;Arezzo;Toscana;051002;1363;sì
+Ospedale S. Giuseppe;FI;Empoli;Toscana;048014;1010;sì
+Ospedale Di Borgo San Lorenzo;FI;Borgo San Lorenzo;Toscana;048004;329;sì
+P.O. F. Lotti Stabilimento Di Pontedera;PI;Pontedera;Toscana;050029;760;sì
+Santa Maria Nuova;FI;Firenze;Toscana;048017;1;no (meno di 10 parti)
+Ospedale Della Misericordia;GR;Grosseto;Toscana;053011;1086;sì
+Santa Maria Della Stella;TR;Orvieto;Umbria;055023;237;sì
+Azienda Ospedaliera Di Perugia;PG;Perugia;Umbria;054039;1804;sì
+Ospedale Di Citta' Di Castello;PG;Citta' Di Castello;Umbria;054013;506;sì
+Azienda Ospedaliera  S. Maria;TR;Terni;Umbria;055032;1070;sì
+Ospedale San Giovanni Battista Foligno;PG;Foligno;Umbria;054018;886;sì
+Ospedale Civile San Matteo Degli Infermi;PG;Spoleto;Umbria;054051;1;no (meno di 10 parti)
+Presidio Ospedaliero Gubbio E G.Tadino;PG;Gubbio;Umbria;054024;431;sì
+Stabilimento Di Ascoli Piceno;AP;Ascoli Piceno;Marche;044007;511;sì
+Stabilimento Di Fano;PU;Fano;Marche;041013;663;sì
+Stabilimento Di Civitanova M.;MC;Civitanova Marche;Marche;043013;739;sì
+Stabilimento Di Macerata;MC;Macerata;Marche;043023;1134;sì
+Stabilimento Di Jesi;AN;Jesi;Marche;042021;850;sì
+Stabilimento  G. Salesi;AN;Ancona;Marche;042002;1478;sì
+Stabilimento  Umberto I - G. M. Lancisi;AN;Ancona;Marche;042002;3;no (meno di 10 parti)
+Stabilimento Di Fermo;FM;Fermo;Marche;109006;689;sì
+Stabilimento Di Senigallia;AN;Senigallia;Marche;042045;482;sì
+Stabilimento Di Pesaro;PU;Pesaro;Marche;041044;477;sì
+Stabilimento Di Urbino;PU;Urbino;Marche;041067;408;sì
+Stabilimento Di S.Benedetto;AP;San Benedetto Del Tronto;Marche;044066;618;sì
+Ospedale Sandro Pertini;RM;Roma;Lazio;058091;853;sì
+Presidio San Filippo Neri;RM;Roma;Lazio;058091;938;sì
+Az.Osp.San Camillo-Forlanini;RM;Roma;Lazio;058091;1660;sì
+Casa Di Cura Villa Margherita;RM;Roma;Lazio;058091;44;sì
+Ospedale S. Scolastica;FR;Cassino;Lazio;060019;430;sì
+Ospedale Dei Castelli;RM;Ariccia;Lazio;058009;880;sì
+Ospedale San Paolo;RM;Civitavecchia;Lazio;058032;258;sì
+San Giovanni Di Dio;LT;Fondi;Lazio;059007;477;sì
+Presidio Ospedaliero Sud;LT;Formia;Lazio;059008;358;sì
+Casa Di Cura Mater Dei;RM;Roma;Lazio;058091;39;sì
+Presidio Ospedaliero Nord;LT;Latina;Lazio;059011;939;sì
+Casa Di Cura Quisisana;RM;Roma;Lazio;058091;54;sì
+Azienda Ospedaliera Sant'andrea;RM;Roma;Lazio;058091;3;no (meno di 10 parti)
+Ospedale Isola Tiberina - Gemelli Isola;RM;Roma;Lazio;058091;3048;sì
+Ospedale  Citta  Di Aprilia;LT;Aprilia;Lazio;059001;508;sì
+Polo Ospedaliero;VT;Viterbo;Lazio;056059;762;sì
+Ospedale S. Giovanni Evangelista;RM;Tivoli;Lazio;058104;110;sì
+Polo Ospedaliero Santo Spirito;RM;Roma;Lazio;058091;441;sì
+Policlinico Casilino;RM;Roma;Lazio;058091;4467;sì
+Osp. Gen. Di Zona  Cristo Re;RM;Roma;Lazio;058091;1195;sì
+Ospedale G. B. Grassi;RM;Roma;Lazio;058091;855;sì
+Polo Ospedaliero Unico Integrato;RI;Rieti;Lazio;057059;310;sì
+Ospedale Civile S.S.Trinita' N.Sede;FR;Sora;Lazio;060074;475;sì
+Ospedale  F. Spaziani;FR;Frosinone;Lazio;060038;792;sì
+Policlinico Universitario A. Gemelli;RM;Roma;Lazio;058091;4380;sì
+Madre Giuseppina Vannini;RM;Roma;Lazio;058091;501;sì
+Casa Di Cura Santa Famiglia;RM;Roma;Lazio;058091;1647;sì
+Policlinico Umberto Primo;RM;Roma;Lazio;058091;1039;sì
+Azienda Osp. S.Giovanni/Addolorata;RM;Roma;Lazio;058091;1141;sì
+Ospedale San Pietro - Fbf;RM;Roma;Lazio;058091;3505;sì
+Ospedale S.Eugenio;RM;Roma;Lazio;058091;1552;sì
+P.O.San Salvatore;AQ;L'aquila;Abruzzo;066049;729;sì
+P.O. Clinicizz.  Ss. Annunziata;CH;Chieti;Abruzzo;069022;1369;sì
+P.O. Lanciano  Renzetti;CH;Lanciano;Abruzzo;069046;440;sì
+Po Avezzano  S. Filippo E Nicola;AQ;Avezzano;Abruzzo;066006;743;sì
+P.O. Vasto  S. Pio Da Pietralcina;CH;Vasto;Abruzzo;069099;668;sì
+P.O. S. Massimo;PE;Penne;Abruzzo;068027;1;no (meno di 10 parti)
+Po Sulmona Dell'annunziata;AQ;Sulmona;Abruzzo;066098;128;sì
+Ospedale Mazzini;TE;Teramo;Abruzzo;067041;645;sì
+Ospedale Della Val Vibrata;TE;Sant'omero;Abruzzo;067039;629;sì
+P.O.  Spirito Santo;PE;Pescara;Abruzzo;068028;2015;sì
+Ospedale Veneziale;IS;Isernia;Molise;094023;277;sì
+Plesso Ospedaliero  S. Timoteo;CB;Termoli;Molise;070078;201;sì
+Presidio Ospedaliero  A. Cardarelli;CB;Campobasso;Molise;070006;632;sì
+Casa Di Cura  Villa Fiorita  Spa;CE;Capua;Campania;061015;759;sì
+Casa Di Cura San Paolo;CE;Aversa;Campania;061005;594;sì
+Hyppocratica Spa Cdc Villa Del Sole;SA;Salerno;Campania;065116;944;sì
+P.O. Martiri Di Villa Malta;SA;Sarno;Campania;065135;622;sì
+Osp.Sacro Cuore Di Gesu' Fatebenefratelli;BN;Benevento;Campania;062008;867;sì
+Ospedale San Giuliano;;Giugliano In Campania;Campania;063034;874;sì
+P.O. Umberto I;SA;Nocera Inferiore;Campania;065078;1268;sì
+Casa Di Cura Ospedale Fatebenefratelli;;Napoli;Campania;063049;1608;sì
+P.O. San Paolo;;Napoli;Campania;063049;376;sì
+	A.O.U.  Federico II  Di Napoli;;Napoli;Campania;063049;3046;sì
+Casa Di Cura    N.S. Di Lourdes   Spa;;Massa Di Somma;Campania;063092;1135;sì
+Ospedale Ariano Irpino;AV;Ariano Irpino;Campania;064005;177;sì
+Presidio Ospedaliero  Immacolata;SA;Sapri;Campania;065134;190;sì
+Casa Di Cura Villa Dei Fiori  Srl;;Acerra;Campania;063001;1347;sì
+Azienda Ospedaliera S. G. Moscati;AV;Avellino;Campania;064008;1087;sì
+Ospedale Civile S. Giovanni Di Dio;;Frattamaggiore;Campania;063032;647;sì
+Casa Di Cura Villa Dei Platani;AV;Avellino;Campania;064008;1513;sì
+Presidio Ospedaliero Ospedale Del Mare;;Napoli;Campania;063049;565;sì
+Presidio Ospedaliero S.G.Moscati Aversa;CE;Aversa;Campania;061005;904;sì
+Casa Di Cura   La Madonnina   Srl;;San Gennaro Vesuviano;Campania;063066;734;sì
+Clinica Mediterranea Spa;;Napoli;Campania;063049;313;sì
+Icm-Istituto Clinico Mediterraneo Spa;SA;Agropoli;Campania;065002;442;sì
+Ospedale Rizzoli;;Lacco Ameno;Campania;063038;301;sì
+Azienda Ospedaliera  A. Cardarelli;;Napoli;Campania;063049;692;sì
+P.O. Vallo Della Lucania;SA;Vallo Della Lucania;Campania;065154;240;sì
+Ospedali Riuniti Area Nolana Plesso Nola;;Nola;Campania;063050;706;sì
+Clinica Santa Patrizia;;Napoli;Campania;063049;521;sì
+Casa Di Cura Osp. Internazionale Srl;;Napoli;Campania;063049;1134;sì
+Clinica Sanatrix Spa;;Napoli;Campania;063049;1038;sì
+Presidio Ospedaliero Piedimonte Matese;CE;Piedimonte Matese;Campania;061057;163;sì
+P.O. San Giovanni Bosco;;Napoli;Campania;063049;459;sì
+Casa Di Cura Villa Stabia;;Castellammare Di Stabia;Campania;063024;878;sì
+Ospedale S.M.Delle Grazie;;Pozzuoli;Campania;063060;801;sì
+A.O. Sant'anna E San Sebastiano;CE;Caserta;Campania;061022;1195;sì
+Villa Del Sole;CE;Caserta;Campania;061022;646;sì
+Casa Di Cura Villa Cinzia Srl;;Napoli;Campania;063049;992;sì
+Presidio Ospedaliero Luigi Curto;SA;Polla;Campania;065097;366;sì
+S.  Leonardo;;Castellammare Di Stabia;Campania;063024;928;sì
+P.O. De Luca E Rossano;;Vico Equense;Campania;063086;664;sì
+Presidio Ospedaliero Rummo;BN;Benevento;Campania;062008;918;sì
+P.O. S. Maria Della Speranza;SA;Battipaglia;Campania;065014;720;sì
+Presidio Ospedaliero Marcianise;CE;Marcianise;Campania;061049;637;sì
+Presidio Ospedaliero  San Rocco;CE;Sessa Aurunca;Campania;061088;179;sì
+Azienda Ospedaliera Universitaria Unicam;;Napoli;Campania;063049;920;sì
+Casa Di Cura Maria Rosaria Spa;;Pompei;Campania;063058;927;sì
+Clinica San Michele;CE;Maddaloni;Campania;061048;529;sì
+Cotugno;;Napoli;Campania;063049;1;no (meno di 10 parti)
+Fondazione Evangelica Betania;;Napoli;Campania;063049;1696;sì
+Casa Di Cura Pineta Grande;CE;Castel Volturno;Campania;061027;1525;sì
+A.O. Oo.Rr. S. Giovanni Di Dio E Ruggi D'aragona;SA;Salerno;Campania;065116;1471;sì
+Ospedale Bisceglie;BT;Bisceglie;Puglia;110003;495;sì
+Ospedale Ss Annunziata;TA;Taranto;Puglia;073027;1985;sì
+Ospedale Galatina  S. Caterina Novella;LE;Galatina;Puglia;075029;568;sì
+Ospedale Umberto I Corato;BA;Corato;Puglia;072020;615;sì
+Ospedale Perrino;BR;Brindisi;Puglia;074001;1465;sì
+Ospedale Gallipoli  Sacro Cuore Di Gesu;LE;Gallipoli;Puglia;075031;417;sì
+Ospedale San Paolo;BA;Bari;Puglia;072006;834;sì
+Ospedale Della Murgia - Perinei;BA;Altamura;Puglia;072004;555;sì
+Ospedale Monopoli;BA;Monopoli;Puglia;072030;586;sì
+Ospedale Di Venere;BA;Bari;Puglia;072006;2096;sì
+Ospedale Casa Sollievo Della Sofferenza;FG;San Giovanni Rotondo;Puglia;071046;812;sì
+Ospedale Scorrano;LE;Scorrano;Puglia;075073;595;sì
+Ospedale Cerignola   S.Tatarella;FG;Cerignola;Puglia;071020;570;sì
+Ospedale Castellaneta;TA;Castellaneta;Puglia;073003;477;sì
+Ospedale Regionale Ee  Miulli;BA;Acquaviva Delle Fonti;Puglia;072001;1661;sì
+Ospedale Regionale Ee  G. Panico;LE;Tricase;Puglia;075088;1167;sì
+Consorziale Policlinico Bari;BA;Bari;Puglia;072006;1360;sì
+Casa Di Cura C.B.H. Mater Dei Hospital;BA;Bari;Puglia;072006;1459;sì
+Ospedali Riuniti Di Foggia;FG;Foggia;Puglia;071024;2106;sì
+Ospedale Andria;BT;Andria;Puglia;110001;608;sì
+Ospedale Civile;TA;Martina Franca;Puglia;073013;837;sì
+Ospedale Barletta -  Mons. R. Dimiccoli;BT;Barletta;Puglia;110002;460;sì
+Ospedale Lecce  V. Fazzi;LE;Lecce;Puglia;075035;1809;sì
+Ospedale San Severo - Teresa Masselli;FG;San Severo;Puglia;071051;524;sì
+Ospedale S.Giovanni Di Dio - Melfi;PZ;Melfi;Basilicata;076048;412;sì
+Presidio Ospedaliero;MT;Matera;Basilicata;077014;751;sì
+Ospedale San Carlo;PZ;Potenza;Basilicata;076063;1238;sì
+Ospedale S.Giovanni Di Lagonegro;PZ;Lagonegro;Basilicata;076039;529;sì
+Psa Policoro;MT;Policoro;Basilicata;077021;324;sì
+Ospedale Corigliano;CS;Corigliano-Rossano;Calabria;078157;518;sì
+Ospedale Civile;RC;Locri;Calabria;080043;764;sì
+Presidio Pugliese;CZ;Catanzaro;Calabria;079023;1758;sì
+P.O.  S. Maria Degli Ungheresi;RC;Polistena;Calabria;080061;905;sì
+Azienda Ospedaliera Di Cosenza;CS;Cosenza;Calabria;078045;1845;sì
+Ospedale  Cetraro;CS;Cetraro;Calabria;078040;152;sì
+P.O. Jazzolino;VV;Vibo Valentia;Calabria;102047;614;sì
+Ospedale Civile Ferrari;CS;Castrovillari;Calabria;078033;393;sì
+Igreco Ospedali Riuniti Ex Sacro Cuore;CS;Cosenza;Calabria;078045;771;sì
+Ospedale Civile San Giovanni Di Dio;KR;Crotone;Calabria;101010;872;sì
+Presidio Ospedaliero;CZ;Lamezia Terme;Calabria;079160;614;sì
+Presidio Ospedaliero Riuniti;RC;Reggio Di Calabria;Calabria;080063;2022;sì
+Ospedale Dei Bambini G. Di Cristina;PA;Palermo;Sicilia;082053;2;no (meno di 10 parti)
+Casa Di Cura Serena Spa;PA;Palermo;Sicilia;082053;936;sì
+Ospedale Civico;PA;Palermo;Sicilia;082053;1844;sì
+Az.Osp.Univ.P.Giaccone;PA;Palermo;Sicilia;082053;803;sì
+Presidio Ospedaliero S.Marco;CT;Catania;Sicilia;087015;1896;sì
+P.O. S. Giacomo D'altopasso;AG;Licata;Sicilia;084021;403;sì
+Fond. Ist. S. Raffaele - Giglio;PA;Cefalu';Sicilia;082027;376;sì
+Azienda Ospedaliera Papardo;ME;Messina;Sicilia;083048;710;sì
+Casa Di Cura  Triolo Zancla  Spa;PA;Palermo;Sicilia;082053;676;sì
+Ospedale Maggiore;RG;Modica;Sicilia;088006;820;sì
+P.O. Giovanni Paolo Ii;AG;Sciacca;Sicilia;084041;608;sì
+Ospedale Generale Di Zona;SR;Lentini;Sicilia;089011;325;sì
+Ospedale Guzzardi;RG;Vittoria;Sicilia;088012;626;sì
+P.O. G. F. Ingrassia;PA;Palermo;Sicilia;082053;539;sì
+P.O. Di Maria;SR;Avola;Sicilia;089002;378;sì
+P.O. Umberto I (Ex A.O.);SR;Siracusa;Sicilia;089017;1048;sì
+P.O. S. Giovanni Di Dio;AG;Agrigento;Sicilia;084001;1436;sì
+P.O.  G. Fogliani;ME;Milazzo;Sicilia;083049;395;sì
+Nuovo Ospedale Garibaldi - Nesima;CT;Catania;Sicilia;087015;2349;sì
+P.O. Vittorio Emanuele (Ex Ao);CL;Gela;Sicilia;085007;551;sì
+P.O.  S. Vincenzo;ME;Taormina;Sicilia;083097;430;sì
+P. O.  Carlo Basilotta;EN;Nicosia;Sicilia;086012;172;sì
+P.O. S. Marta E S. Venera;CT;Acireale;Sicilia;087004;416;sì
+P.O. Sant'elia (Ex Ao);CL;Caltanissetta;Sicilia;085004;423;sì
+P.O. V.Emanuele Ii;TP;Castelvetrano;Sicilia;081006;1;no (meno di 10 parti)
+P.O.  B. Nagar;TP;Pantelleria;Sicilia;081014;1;no (meno di 10 parti)
+Casa Di Cura Candela Spa;PA;Palermo;Sicilia;082053;731;sì
+Ospedale Garibaldi - Centro;CT;Catania;Sicilia;087015;1;no (meno di 10 parti)
+P.O.  Barone-Romeo;ME;Patti;Sicilia;083066;893;sì
+P.O.Paolo Borsellino;TP;Marsala;Sicilia;081011;559;sì
+Ospedale  Giovanni Paolo Ii M.P. A.;RG;Ragusa;Sicilia;088009;1408;sì
+P.O.Abele Ajello;TP;Mazara Del Vallo;Sicilia;081012;562;sì
+Casa Di Cura Prof.E.Falcidia Srl;CT;Catania;Sicilia;087015;628;sì
+P.O. S. Cimino;PA;Termini Imerese;Sicilia;082070;484;sì
+Presidio Ospedaliero Gaspare Rodolico;CT;Catania;Sicilia;087015;1086;sì
+Istituto Clinico Vidimura Srl;CT;Catania;Sicilia;087015;485;sì
+P.O. Barone Lombardo;AG;Canicatti';Sicilia;084011;474;sì
+P.O. Gravina E S. Pietro;CT;Caltagirone;Sicilia;087011;487;sì
+A.O. Per L'emergenza Cannizzaro;CT;Catania;Sicilia;087015;1161;sì
+P. O.  Umberto I;EN;Enna;Sicilia;086009;818;sì
+P.O. S. Antonio Abate;TP;Erice;Sicilia;081008;1105;sì
+P.O. V. Cervello;PA;Palermo;Sicilia;082053;1151;sì
+P.O. Civico;PA;Partinico;Sicilia;082054;258;sì
+P.O. Dei Bianchi;PA;Corleone;Sicilia;082034;27;sì
+Azienda Osp. Univ. G. Martino;ME;Messina;Sicilia;083048;1084;sì
+Irccs Ismett;PA;Palermo;Sicilia;082053;3;no (meno di 10 parti)
+P.O. Maria Ss.Addolorata;CT;Biancavilla;Sicilia;087008;387;sì
+Osp. Buccheri La Ferla Fatebenefratelli;PA;Palermo;Sicilia;082053;1882;sì
+P.O.  San Francesco;NU;Nuoro;Sardegna;114027;847;sì
+Stabilimento San Michele;CA;Cagliari;Sardegna;118006;575;sì
+Stabilimento Cliniche Di San Pietro;SS;Sassari;Sardegna;112050;1423;sì
+P.O.Cto;SU;Iglesias;Sardegna;119009;173;sì
+P.O. Ss. Trinita';CA;Cagliari;Sardegna;118006;1495;sì
+Ospedale Civile;SS;Ozieri;Sardegna;112040;1;no (meno di 10 parti)
+Stabilimento A. Businco;CA;Cagliari;Sardegna;118006;1;no (meno di 10 parti)
+P. Ospedaliero  San Martino;OR;Oristano;Sardegna;115045;403;sì
+Ospedale Civile;SS;Alghero;Sardegna;112001;1;no (meno di 10 parti)
+P.O.  Nostra Signora Della Mercede;NU;Lanusei;Sardegna;116010;3;no (meno di 10 parti)
+P.O.  Giovanni Paolo Ii;SS;Olbia;Sardegna;113017;711;sì
+Presidio Ospedaliero N.S. Di Bonaria;SU;San Gavino Monreale;Sardegna;117014;264;sì
+Stabilimento Ss. Annunziata;SS;Sassari;Sardegna;112050;2;no (meno di 10 parti)
+Mater Olbia Hospital;SS;Olbia;Sardegna;113017;1;no (meno di 10 parti)
+Policlinico Monserrato;CA;Cagliari;Sardegna;118006;1042;sì

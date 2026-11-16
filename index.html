@@ -1,12 +1,18 @@
 <!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Punti nascita – Radar QN</title>
-<style>body{font-family:'Libre Franklin',Arial,sans-serif;max-width:1180px;margin:24px auto;padding:0 16px;color:#1a1a1a;background:#f7f8f9}h1{font-family:Newsreader,Georgia,serif}.row{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}iframe{border:1px solid #e3e3e3;background:#f7f8f9}pre{background:#fff;border:1px solid #e3e3e3;padding:12px;white-space:pre-wrap;word-break:break-all;font-size:12px}</style></head>
-<body><h1>Punti nascita – dataviz Radar</h1>
-<h2>Meno nascite, meno ospedali</h2>
-<div class="row"><iframe src="parti-punti-nascita/" width="760" height="640" title="Desktop"></iframe><iframe src="parti-punti-nascita/" width="360" height="1100" title="Mobile"></iframe></div>
-<p><button onclick="navigator.clipboard.writeText(document.getElementById('s1').textContent)">Copia snippet</button></p>
-<pre id="s1"></pre>
+<style>body{font-family:'Libre Franklin',Arial,sans-serif;max-width:1180px;margin:24px auto;padding:0 16px;color:#1a1a1a;background:#f7f8f9}h1,h2{font-family:Newsreader,Georgia,serif}.row{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}iframe{border:1px solid #e3e3e3;background:#f7f8f9}pre{background:#fff;border:1px solid #e3e3e3;padding:12px;white-space:pre-wrap;word-break:break-all;font-size:12px}section{margin:0 0 48px}</style></head>
+<body><h1>Punti nascita – dataviz Radar</h1><div id="list"></div>
 <script>
+var V=[["parti-punti-nascita","Meno nascite, meno ospedali",620,1080],["mappa-punti-nascita","Dove non si nasce più",1300,1190],["distanze-parto","Quanto è lontano il primo parto",1100,1460]];
 var base=location.href.replace(/index\.html$/,"").replace(/\/?$/,"/");
 fetch("assets/embed.min.js").then(function(r){return r.text()}).then(function(js){
-document.getElementById("s1").textContent='<iframe src="'+base+'parti-punti-nascita/" width="100%" height="640" frameborder="0" scrolling="no" title="Parti e punti nascita in Italia, 2010-2025"></iframe>\n<script>'+js.trim().replace("https://ACCOUNT.github.io",location.origin)+'<\/script>';});
+ js=js.trim().replace("https://ACCOUNT.github.io",location.origin);
+ V.forEach(function(v,i){
+  var s=document.createElement("section");
+  s.innerHTML='<h2>'+v[1]+'</h2><div class="row"><iframe src="'+v[0]+'/" width="760" height="'+v[2]+'" title="Desktop"></iframe><iframe src="'+v[0]+'/" width="360" height="'+v[3]+'" title="Mobile"></iframe></div><p><button>Copia snippet</button></p><pre></pre>';
+  var snip='<iframe src="'+base+v[0]+'/" width="100%" height="'+v[2]+'" frameborder="0" scrolling="no" title="'+v[1]+'"></iframe>\n<script>'+js+'<\/script>';
+  s.querySelector("pre").textContent=snip;
+  s.querySelector("button").onclick=function(){navigator.clipboard.writeText(snip)};
+  document.getElementById("list").appendChild(s);
+ });
+});
 </script></body></html>

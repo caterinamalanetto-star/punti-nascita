@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quanto è lontano il primo parto – Radar QN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,700&display=swap">
+<link rel="stylesheet" href="../assets/radar.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="../assets/radar.js"></script>
+<style>
+  .seg { display: inline-flex; border: 1px solid var(--grid); border-radius: 999px; padding: 2px; margin: 0 0 12px; }
+  .seg button { font: inherit; font-size: 13px; color: var(--ink-2); background: none; border: 0; border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); font-weight: 600; }
+  .sw--d10 { border: 1.5px solid var(--grey-2); border-radius: 50%; background: var(--bg); width: 9px; height: 9px; }
+  .sw--d24 { background: var(--blue); border-radius: 50%; }
+  .sw--d500 { background: var(--red); border-radius: 50%; }
+  .row-name { font-size: 13px; font-weight: 600; fill: var(--ink); }
+  .row-sub { font-size: 12px; fill: var(--ink-2); }
+</style>
+</head>
+<body>
+<main class="radar">
+  <header>
+    <h1 class="r-title">Con la soglia dei 500 parti, un milione di persone a più di un'ora dalla sala parto</h1>
+    <p class="r-sub">Minuti di strada dal centro del comune al punto nascita più vicino: nel 2010, oggi e se restassero aperti solo i punti nascita con almeno 500 parti l'anno</p>
+  </header>
+
+  <div class="r-big" id="big" aria-hidden="true">
+    <span><span class="r-big__num" id="big-num">&nbsp;</span> <span class="r-big__unit">mln</span></span>
+    <span class="r-big__label" id="big-label"></span>
+  </div>
+
+  <figure class="r-chart" id="c-bars" style="margin-top:24px">
+    <p class="r-chart__head">Residenti lontani dalla sala parto</p>
+    <p class="r-chart__sub" id="bars-sub"></p>
+    <div class="seg" role="group" aria-label="Soglia di tempo">
+      <button type="button" data-th="30" aria-pressed="false">Oltre 30 min</button>
+      <button type="button" data-th="45" aria-pressed="false">Oltre 45 min</button>
+      <button type="button" data-th="60" aria-pressed="true">Oltre 60 min</button>
+    </div>
+  </figure>
+
+  <figure class="r-chart" id="c-dots" style="margin-top:28px">
+    <p class="r-chart__head">Dieci territori</p>
+    <p class="r-chart__sub">Minuti fino al punto nascita più vicino</p>
+  </figure>
+  <div class="r-key">
+    <span><i class="sw sw--d10"></i>Nel 2010 (reparti di ostetricia)</span>
+    <span><i class="sw sw--d24"></i>Oggi</span>
+    <span><i class="sw sw--d500"></i>Con la soglia dei 500 parti</span>
+  </div>
+
+  <p class="r-note" id="note"></p>
+
+  <footer class="r-foot">
+    <span>Fonte: Agenas (PNE, parti 2024), Istat (matrici delle distanze), ministero della Salute (posti letto 2010)</span>
+    <span>Elaborazione Radar – QN</span>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var R = Radar, fmt = R.fmt;
+  var AREA = { A: "polo", B: "polo intercomunale", C: "cintura", D: "area interna, intermedio", E: "area interna, periferico", F: "area interna, ultraperiferico" };
+
+  Promise.all([R.loadCSV("../data/tempi-comuni.csv"), R.loadCSV("../data/territori.csv"), R.loadCSV("../data/punti-nascita-2024.csv")]).then(function (res) {
+    var all = res[0].map(function (r) {
+      return { id: r["id"], name: r["Comune"], prov: r["Provincia"], pop: R.num(r["Residenti 2020"]), area: r["Area interna"],
+        t10: R.num(r["Minuti 2010"]), t24: R.num(r["Minuti 2024"]), t500: R.num(r["Minuti soglia 500"]),
+        n24: r["Comune del punto nascita 2024"], n500: r["Comune del punto nascita soglia 500"],
+        i24: r["id punto nascita 2024"], i500: r["id punto nascita soglia 500"], gone: r["Reparto chiuso"] === "sì" };
+    });
+    var byId = new Map(all.map(function (d) { return [d.id, d]; }));
+    var partiCom = new Map();
+    res[2].forEach(function (r) { if (r["Considerato punto nascita"] === "sì") partiCom.set(r["id"], (partiCom.get(r["id"]) || 0) + R.num(r["Parti 2024"])); });
+    var sel = res[1].map(function (r) { return byId.get(r["id"]); }).filter(Boolean)
+      .sort(function (a, b) { return b.t500 - a.t500 || b.t24 - a.t24; });
+
+    function over(key, th) { return d3.sum(all, function (d) { return d[key] > th ? d.pop : 0; }); }
+    var S = [{ key: "t10", lab: "2010", c: "var(--grey-3)" }, { key: "t24", lab: "Oggi", c: "var(--blue)" }, { key: "t500", lab: "Soglia 500 parti", c: "var(--red)" }];
+
+    // big number
+    var big = over("t500", 60), now = over("t24", 60), old = over("t10", 60);
+    var bigNum = d3.select("#big-num"), bigFmt = function (v) { return fmt(v / 1e6, 1); };
+    d3.select("#big-label").text("residenti a più di un'ora dal punto nascita più vicino se chiudessero quelli sotto i 500 parti. Oggi sono " +
+      fmt(Math.round(now / 1000)) + " mila, nel 2010 " + fmt(Math.round(old / 1000)) + " mila");
+    if (R.reduced) bigNum.text(bigFmt(big)); else { bigNum.text(bigFmt(0)); R.onFirstView(document.getElementById("big"), function () { R.countUp(bigNum, big, bigFmt, "play"); }); }
+
+    d3.select("#note").text("Tempi stradali Istat tra il centro del comune di residenza e quello del comune del punto nascita. Oggi: strutture con almeno 10 parti nel 2024 secondo il PNE di Agenas. " +
+      "2010: reparti di ostetricia e ginecologia del ministero della Salute; non tutti facevano parti, quindi le distanze di allora sono sottostimate. Residenti al censimento 2020.");
+
+    // ---- barre ----
+    var th = 60;
+    var hostB = document.getElementById("c-bars"), tipB = R.tooltip(hostB);
+    R.dismissOutside(hostB, function () { tipB.hide(); });
+    var drawBars;
+    R.responsive(hostB, drawBars = function (W, phase) {
+      var narrow = R.isNarrow(W);
+      d3.select("#bars-sub").text("Residenti a più di " + th + " minuti dal punto nascita più vicino");
+      var vals = S.map(function (s) { return { s: s, v: over(s.key, th) }; });
+      var m = { top: 0, right: 74, bottom: 0, left: narrow ? 104 : 126 }, bh = 26, gap = 12;
+      var H = vals.length * (bh + gap) - gap, w = W - m.left - m.right;
+      var x = d3.scaleLinear().domain([0, d3.max(vals, function (d) { return d.v; })]).range([0, w]);
+      d3.select(hostB).select("svg").remove();
+      var svg = d3.select(hostB).insert("svg", ".r-tip").attr("width", W).attr("height", H).attr("role", "img")
+        .attr("aria-label", "Residenti a più di " + th + " minuti: " + vals.map(function (d) { return d.s.lab + " " + fmt(d.v); }).join(", "));
+      var g = svg.append("g").attr("transform", "translate(" + m.left + ",0)");
+      var rows = g.selectAll("g").data(vals).join("g").attr("transform", function (d, i) { return "translate(0," + i * (bh + gap) + ")"; });
+      rows.append("text").attr("class", "series-label").attr("x", -10).attr("y", bh / 2).attr("dy", "0.35em").attr("text-anchor", "end").text(function (d) { return d.s.lab; });
+      var bars = rows.append("path").attr("class", "mark").style("fill", function (d) { return d.s.c; });
+      var labs = rows.append("text").attr("class", "series-label").attr("y", bh / 2).attr("dy", "0.35em");
+      function lab(d) { return d.v >= 1e6 ? fmt(d.v / 1e6, 1) + " mln" : fmt(Math.round(d.v / 1000)) + " mila"; }
+      R.enter(bars, phase, function (s) { s.attr("d", function () { return R.barPathH(0, 0, 0, bh, 2); }); },
+        function (s) { s.attr("d", function (d) { return R.barPathH(0, 0, x(d.v), bh, 2); }); });
+      R.enter(labs, phase, function (s) { s.attr("x", 6).style("opacity", 0); }, function (s) { s.attr("x", function (d) { return x(d.v) + 6; }).style("opacity", 1); });
+      labs.text(lab);
+      rows.on("pointermove pointerdown", function (ev, d) {
+        bars.classed("is-dimmed", function (b) { return b !== d; });
+        var p = d3.pointer(ev, hostB);
+        tipB.show(R.tipHTML({ title: d.s.lab, value: fmt(d.v), unit: "residenti", note: "a più di " + th + " minuti dal punto nascita più vicino" }), p[0], p[1]);
+      }).on("pointerleave", function (ev) { if (ev.pointerType === "mouse") { tipB.hide(); bars.classed("is-dimmed", false); } });
+    });
+    d3.selectAll(".seg button").on("click", function () {
+      th = +this.getAttribute("data-th");
+      d3.selectAll(".seg button").attr("aria-pressed", function () { return +this.getAttribute("data-th") === th ? "true" : "false"; });
+      tipB.hide(); drawBars(Math.floor(hostB.getBoundingClientRect().width), "play"); R.scheduleHeight();
+    });
+
+    // ---- dot plot ----
+    var hostD = document.getElementById("c-dots"), tipD = R.tooltip(hostD);
+    var clearD = function () {};
+    R.dismissOutside(hostD, function () { tipD.hide(); clearD(); });
+    R.responsive(hostD, function (W, phase) {
+      var narrow = R.isNarrow(W);
+      var m = { top: narrow ? 14 : 8, right: 36, bottom: 28, left: narrow ? 10 : 172 }, rh = narrow ? 52 : 38;
+      var H = m.top + sel.length * rh + m.bottom, w = W - m.left - m.right;
+      var xMax = Math.ceil(d3.max(sel, function (d) { return Math.max(d.t10, d.t24, d.t500); }) / 30) * 30;
+      var x = d3.scaleLinear().domain([0, xMax]).range([0, w]);
+      var ticks = d3.range(0, xMax + 1, narrow ? 60 : 30);
+      d3.select(hostD).select("svg").remove();
+      var svg = d3.select(hostD).insert("svg", ".r-tip").attr("width", W).attr("height", H).attr("role", "img")
+        .attr("aria-label", "Minuti fino al punto nascita più vicino in dieci comuni. " + sel.map(function (d) {
+          return d.name + ": oggi " + d.t24 + ", con la soglia " + d.t500; }).join("; "));
+      var g = svg.append("g").attr("transform", "translate(" + m.left + "," + m.top + ")");
+      var ih = sel.length * rh;
+      g.append("g").attr("class", "grid").selectAll("line").data(ticks).join("line")
+        .attr("x1", function (d) { return Math.round(x(d)) + 0.5; }).attr("x2", function (d) { return Math.round(x(d)) + 0.5; })
+        .attr("y1", 0).attr("y2", ih).attr("class", function (d) { return d === 0 ? "baseline" : null; });
+      g.append("g").selectAll("text").data(ticks).join("text").attr("class", "tick-label")
+        .attr("x", function (d) { return x(d); }).attr("y", ih + 18).attr("text-anchor", "middle")
+        .text(function (d, i) { return fmt(d) + (i === ticks.length - 1 ? " min" : ""); });
+
+      var rows = g.selectAll("g.row").data(sel).join("g").attr("class", "row").attr("transform", function (d, i) { return "translate(0," + (i * rh + rh / 2) + ")"; });
+      if (narrow) {
+        var nt = rows.append("text").attr("x", -m.left).attr("y", -12);
+        nt.append("tspan").attr("class", "row-name").text(function (d) { return d.name + " (" + d.prov + ")"; });
+        nt.append("tspan").attr("class", "row-sub").text(function (d) { return "  " + fmt(d.pop) + " abitanti"; });
+      } else {
+        rows.append("text").attr("class", "row-name").attr("x", -12).attr("y", -3).attr("text-anchor", "end").text(function (d) { return d.name + " (" + d.prov + ")"; });
+        rows.append("text").attr("class", "row-sub").attr("x", -12).attr("y", 12).attr("text-anchor", "end").text(function (d) { return fmt(d.pop) + " abitanti"; });
+      }
+      var dy = narrow ? 8 : 0;
+      var link = rows.append("line").attr("y1", dy).attr("y2", dy).style("stroke", "var(--grey-4)").attr("stroke-width", 2).attr("stroke-linecap", "round");
+      R.enter(link, phase, function (s) { s.attr("x1", 0).attr("x2", 0); },
+        function (s) { s.attr("x1", function (d) { return x(Math.min(d.t10, d.t24, d.t500)); }).attr("x2", function (d) { return x(Math.max(d.t10, d.t24, d.t500)); }); });
+      var c10 = rows.append("circle").attr("cy", dy).attr("class", "mark").attr("r", 5).style("fill", "var(--bg)").style("stroke", "var(--grey-2)").attr("stroke-width", 1.5);
+      var c24 = rows.append("circle").attr("cy", dy).attr("class", "mark").attr("r", 5.5).style("fill", "var(--blue)").style("stroke", "var(--bg)").attr("stroke-width", 1);
+      var c500 = rows.append("circle").attr("cy", dy).attr("class", "mark").attr("r", 5.5).style("fill", "var(--red)").style("stroke", "var(--bg)").attr("stroke-width", 1);
+      [[c10, "t10"], [c24, "t24"], [c500, "t500"]].forEach(function (p) {
+        R.enter(p[0], phase, function (s) { s.attr("cx", 0); }, function (s) { s.attr("cx", function (d) { return x(d[p[1]]); }); });
+      });
+      var vl = rows.append("text").attr("class", "series-label").attr("y", dy).attr("dy", "0.35em").style("fill", "var(--red)")
+        .text(function (d) { return fmt(d.t500); });
+      R.enter(vl, phase, function (s) { s.attr("x", 10).style("opacity", 0); }, function (s) { s.attr("x", function (d) { return x(d.t500) + 10; }).style("opacity", 1); });
+
+      function where(min, name, id) {
+        if (min === 0) return "nel comune";
+        var p = partiCom.get(id);
+        return fmt(min) + " min, " + name + (p ? " (" + fmt(p) + " parti)" : "");
+      }
+      function act(ev, d) {
+        rows.selectAll(".mark").classed("is-dimmed", function () { return this.__data__ !== d; });
+        var notes = [];
+        notes.push(AREA[d.area] ? "Classe: " + AREA[d.area] + "." : "");
+        if (d.gone) notes.push("Nel 2010 aveva un reparto di ostetricia e ginecologia.");
+        var p = d3.pointer(ev, hostD);
+        tipD.show(R.tipHTML({ title: d.name + " (" + d.prov + ")", value: fmt(d.t24), unit: "minuti oggi",
+          rows: [["Oggi", where(d.t24, d.n24, d.i24)], ["Soglia 500", where(d.t500, d.n500, d.i500)], ["Nel 2010", d.t10 === 0 ? "nel comune" : fmt(d.t10) + " min"]],
+          note: notes.join(" ").trim() || null }), p[0], p[1]);
+      }
+      clearD = function () { rows.selectAll(".mark").classed("is-dimmed", false); };
+      rows.append("rect").attr("class", "hit").attr("x", -m.left).attr("y", -rh / 2).attr("width", W).attr("height", rh)
+        .on("pointermove pointerdown", act).on("pointerleave", function (ev) { if (ev.pointerType === "mouse") { tipD.hide(); clearD(); } });
+    });
+  }).catch(function (e) { R.fail("#c-dots", e); });
+})();
+</script>
+</body>
+</html>
