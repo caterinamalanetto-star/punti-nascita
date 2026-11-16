@@ -6,6 +6,9 @@
 | Dove non si nasce più (mappa dei tempi verso il punto nascita) | `mappa-punti-nascita/` | `data/tempi-comuni.csv`, `data/punti-nascita-2024.csv`, `data/comuni.json`, `data/regioni.json` |
 | Quanto è lontano il primo parto (scenari e dieci territori) | `distanze-parto/` | `data/tempi-comuni.csv`, `data/territori.csv`, `data/punti-nascita-2024.csv` |
 | Senza Nottola e Campostaggia (provincia di Siena) | `siena-nottola/` | `data/siena-nottola.csv` |
+| Ogni ospedale un punto (punti nascita per parti e area interna) | `ospedali-punti-nascita/` | `data/punti-nascita-2024.csv`, `data/tempi-comuni.csv` |
+| La sicurezza in cifre (terapia intensiva e pretermine per classe) | `sicurezza-punti-nascita/` | `data/sicurezza-classi.csv` (CeDAP 2025, tab. 6 e 9) |
+| Quanti minuti, quante persone (curva dei residenti per minuti) | `minuti-persone/` | `data/curva-minuti.csv`, calcolato da `data/tempi-comuni.csv` |
 
 ## Fonti
 - Ministero della Salute, Rapporti CeDAP 2024 e 2025, tab. 1 (serie 2010-2025).

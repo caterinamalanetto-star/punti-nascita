@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quanti minuti, quante persone – Radar QN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,700&display=swap">
+<link rel="stylesheet" href="../assets/radar.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="../assets/radar.js"></script>
+<style>.r-key--narrow { display: none; } @media (max-width: 519px) { .r-key--narrow { display: flex; } }</style>
+</head>
+<body>
+<main class="radar">
+  <header>
+    <h1 class="r-title" id="title">&nbsp;</h1>
+    <p class="r-sub">Residenti che vivono oltre un certo numero di minuti di strada dal punto nascita più vicino, in milioni</p>
+  </header>
+
+  <div class="r-big" id="big" aria-hidden="true">
+    <span><span class="r-big__num" id="big-num">&nbsp;</span> <span class="r-big__unit">mln</span></span>
+    <span class="r-big__label" id="big-label"></span>
+  </div>
+
+  <figure class="r-chart" id="chart" style="margin-top:20px"></figure>
+  <div class="r-key r-key--narrow">
+    <span><i class="sw" style="background:var(--red)"></i>Soglia 500 parti</span>
+    <span><i class="sw" style="background:var(--blue)"></i>Oggi</span>
+    <span><i class="sw" style="background:var(--grey-3)"></i>2010</span>
+  </div>
+
+  <p class="r-note" id="note"></p>
+
+  <footer class="r-foot">
+    <span>Fonte: Agenas (PNE, parti 2024), Istat (matrici delle distanze, censimento 2020), ministero della Salute (posti letto 2010)</span>
+    <span>Elaborazione Radar – QN</span>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var R = Radar, fmt = R.fmt;
+  var S = [
+    { col: "Residenti oltre (2010)", key: "a", lab: "2010", c: "var(--grey-3)", w: 1.75 },
+    { col: "Residenti oltre (oggi)", key: "b", lab: "Oggi", c: "var(--blue)", w: 2.25 },
+    { col: "Residenti oltre (soglia 500)", key: "c", lab: "Soglia 500 parti", c: "var(--red)", w: 2.25 }
+  ];
+  var XMAX = 90, MARK = 30;
+  R.loadCSV("../data/curva-minuti.csv").then(function (rows) {
+    var data = rows.map(function (r) { var o = { m: R.num(r["Minuti"]) }; S.forEach(function (s) { o[s.key] = R.num(r[s.col]) / 1e6; }); return o; })
+      .filter(function (d) { return d.m <= XMAX; });
+    var at = function (m) { return data.find(function (d) { return d.m === m; }); };
+    var p30 = at(MARK);
+    d3.select("#title").text("Con la soglia dei 500 parti, quasi raddoppiano le persone a più di mezz'ora dalla sala parto");
+    d3.select("#big-label").text("residenti a più di 30 minuti dal punto nascita più vicino se restassero aperti solo quelli sopra i 500 parti. Oggi sono " +
+      fmt(p30.b, 1) + " milioni, nel 2010 " + fmt(p30.a, 1));
+    var bigNum = d3.select("#big-num"), bigFmt = function (v) { return fmt(v, 1); };
+    if (R.reduced) bigNum.text(bigFmt(p30.c)); else { bigNum.text(bigFmt(0)); R.onFirstView(document.getElementById("big"), function () { R.countUp(bigNum, p30.c, bigFmt, "play"); }); }
+    d3.select("#note").text("Tempi stradali Istat tra il centro del comune di residenza e quello del comune con il punto nascita; chi ha il punto nascita nel proprio comune è a zero minuti. " +
+      "Oggi: strutture con almeno 10 parti nel 2024 (Agenas). 2010: reparti di ostetricia e ginecologia, non tutti con parti: le distanze di allora sono sottostimate. Residenti al censimento 2020.");
+
+    var host = document.getElementById("chart"), tip = R.tooltip(host);
+    var clear = function () {};
+    R.dismissOutside(host, function () { tip.hide(); clear(); });
+    R.responsive(host, function (W, phase) {
+      var narrow = R.isNarrow(W);
+      var m = { top: 14, right: narrow ? 64 : 116, bottom: 30, left: 34 }, H = narrow ? 300 : 360;
+      var w = W - m.left - m.right, h = H - m.top - m.bottom;
+      var x = d3.scaleLinear().domain([0, XMAX]).range([0, w]);
+      var yMax = Math.ceil(d3.max(data, function (d) { return Math.max(d.a, d.b, d.c); }) / 10) * 10;
+      var y = d3.scaleLinear().domain([0, yMax]).range([h, 0]);
+      d3.select(host).select("svg").remove();
+      var svg = d3.select(host).insert("svg", ".r-tip").attr("width", W).attr("height", H).attr("role", "img")
+        .attr("aria-label", "Residenti a più di 30 minuti dal punto nascita: " + fmt(p30.a, 1) + " milioni nel 2010, " + fmt(p30.b, 1) + " oggi, " + fmt(p30.c, 1) + " con la soglia dei 500 parti.");
+      var g = svg.append("g").attr("transform", "translate(" + m.left + "," + m.top + ")");
+      var yt = d3.range(0, yMax + 1, 10);
+      g.append("g").attr("class", "grid").selectAll("line").data(yt).join("line").attr("x1", 0).attr("x2", w)
+        .attr("y1", function (d) { return Math.round(y(d)) + 0.5; }).attr("y2", function (d) { return Math.round(y(d)) + 0.5; })
+        .attr("class", function (d) { return d === 0 ? "baseline" : null; });
+      g.append("g").selectAll("text").data(yt).join("text").attr("class", "tick-label").attr("x", -8).attr("y", function (d) { return y(d); })
+        .attr("dy", "0.35em").attr("text-anchor", "end").text(function (d) { return fmt(d); });
+      var xt = d3.range(0, XMAX + 1, narrow ? 30 : 15);
+      g.append("g").selectAll("text").data(xt).join("text").attr("class", "tick-label").attr("x", function (d) { return x(d); }).attr("y", h + 20)
+        .attr("text-anchor", "middle").text(function (d, i) { return fmt(d) + (i === xt.length - 1 ? " min" : ""); });
+
+      // annotazione a 30 minuti
+      var an = g.append("g").attr("class", "anno");
+      var ax = x(MARK);
+      an.append("line").attr("class", "dash").attr("x1", ax).attr("x2", ax).attr("y1", y(p30.c) - 4).attr("y2", h);
+      an.append("circle").attr("cx", ax).attr("cy", y(p30.c)).attr("r", 2.5);
+      an.append("text").attr("x", ax + 8).attr("y", y(p30.c) - 26).attr("dy", "0.7em")
+        .text("A 30 minuti: " + fmt(p30.c, 1) + " milioni con la soglia, " + fmt(p30.b, 1) + " oggi").call(R.wrap, narrow ? 130 : 190);
+      R.enter(an, phase, function (s) { s.style("opacity", 0); }, function (s) { s.style("opacity", 1); }, R.DUR * 0.7);
+
+      var paths = S.map(function (s) {
+        var line = d3.line().curve(d3.curveMonotoneX).x(function (d) { return x(d.m); }).y(function (d) { return y(d[s.key]); });
+        var p = g.append("path").datum(data).style("fill", "none").style("stroke", s.c).attr("stroke-width", s.w).attr("stroke-linecap", "round").attr("d", line);
+        var L = p.node().getTotalLength();
+        R.enter(p, phase, function (q) { q.attr("stroke-dasharray", L + " " + L).attr("stroke-dashoffset", L); }, function (q) { q.attr("stroke-dashoffset", 0); });
+        return p;
+      });
+      // etichette dirette sopra il tratto piano iniziale delle curve
+      var lx = 1, ld = at(lx);
+      var labs = g.append("g");
+      if (!narrow) S.forEach(function (s, i) {
+        labs.append("text").attr("class", "series-label").attr("x", x(lx)).attr("y", y(ld[s.key]) + (s.key === "c" ? -6 : 15)).style("fill", s.c).text(s.lab);
+      });
+      R.enter(labs, phase, function (q) { q.style("opacity", 0); }, function (q) { q.style("opacity", 1); }, R.DUR * 0.85);
+
+      var cross = g.append("line").attr("class", "crosshair").attr("y1", 0).attr("y2", h).style("opacity", 0);
+      var dots = g.append("g").selectAll("circle").data(S).join("circle").attr("r", 4).style("fill", function (s) { return s.c; }).style("stroke", "var(--bg)").style("opacity", 0);
+      function act(ev) {
+        var mx = x.invert(d3.pointer(ev, g.node())[0]), d = at(Math.max(0, Math.min(XMAX, Math.round(mx))));
+        cross.attr("x1", x(d.m)).attr("x2", x(d.m)).style("opacity", 1);
+        dots.attr("cx", x(d.m)).attr("cy", function (s) { return y(d[s.key]); }).style("opacity", 1);
+        var p = d3.pointer(ev, host);
+        tip.show(R.tipHTML({ title: "Oltre " + d.m + " minuti", rows: S.map(function (s) {
+          return [s.lab, (d[s.key] >= 1 ? fmt(d[s.key], 1) + " mln" : fmt(Math.round(d[s.key] * 1000)) + " mila")]; }) }), x(d.m) + m.left, y(d.c) + m.top);
+      }
+      clear = function () { cross.style("opacity", 0); dots.style("opacity", 0); };
+      g.append("rect").attr("class", "hit").attr("x", 0).attr("y", 0).attr("width", w).attr("height", h)
+        .on("pointermove pointerdown", act).on("pointerleave", function (ev) { if (ev.pointerType === "mouse") { tip.hide(); clear(); } });
+    });
+  }).catch(function (e) { R.fail("#chart", e); });
+})();
+</script>
+</body>
+</html>

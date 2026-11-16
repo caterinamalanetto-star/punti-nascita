@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La sicurezza in cifre – Radar QN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,700&display=swap">
+<link rel="stylesheet" href="../assets/radar.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="../assets/radar.js"></script>
+</head>
+<body>
+<main class="radar">
+  <header>
+    <h1 class="r-title" id="title">&nbsp;</h1>
+    <p class="r-sub">Punti nascita per numero di parti l'anno, 2025</p>
+  </header>
+
+  <div class="r-big" id="big" aria-hidden="true">
+    <span><span class="r-big__num" id="big-num">&nbsp;</span></span>
+    <span class="r-big__label" id="big-label"></span>
+  </div>
+
+  <div class="r-panels">
+    <figure class="r-chart" id="c-tin">
+      <p class="r-chart__head">Con terapia intensiva neonatale</p>
+      <p class="r-chart__sub">% dei punti nascita della classe</p>
+    </figure>
+    <figure class="r-chart" id="c-pre">
+      <p class="r-chart__head">Nati prima del termine</p>
+      <p class="r-chart__sub">% dei parti, sotto le 37 settimane</p>
+    </figure>
+  </div>
+
+  <p class="r-note" id="note"></p>
+
+  <footer class="r-foot">
+    <span>Fonte: ministero della Salute, Rapporto CeDAP 2025 (tab. 6 e 9)</span>
+    <span>Elaborazione Radar – QN</span>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var R = Radar, fmt = R.fmt;
+  R.loadCSV("../data/sicurezza-classi.csv").then(function (rows) {
+    var data = rows.map(function (r) {
+      var n = R.num(r["Punti nascita"]);
+      return { lab: r["Classe di parti"], n: n, tin: R.num(r["Con terapia intensiva neonatale"]), neo: R.num(r["Con neonatologia"]),
+        parti: R.num(r["Parti"]), pre: R.num(r["Pretermine %"]) };
+    });
+    data.forEach(function (d) { d.tinP = d.tin / d.n * 100; d.neoP = d.neo / d.n * 100; });
+    var small = data[0], totN = d3.sum(data, function (d) { return d.n; }), totParti = d3.sum(data, function (d) { return d.parti; });
+    var preTot = d3.sum(data, function (d) { return d.pre * d.parti; }) / totParti;
+    d3.select("#title").text("Sotto i 500 parti, una sola terapia intensiva neonatale in " + fmt(small.n) + " reparti");
+    d3.select("#big-num").text(fmt(small.tin) + " su " + fmt(small.n));
+    d3.select("#big-label").text("punti nascita con meno di 500 parti l'anno con una terapia intensiva neonatale. Ha un'unità di neonatologia il " +
+      fmt(small.neoP, 1) + "%");
+    d3.select("#note").text("Nei punti nascita sotto i 500 parti nasce prima del termine il " + fmt(small.pre, 1) + "% dei bambini, contro il " + fmt(preTot, 1) +
+      "% della media nazionale: le gravidanze a rischio vengono già indirizzate verso gli ospedali maggiori. Media nazionale dei pretermine pesata sui parti di ciascuna classe.");
+
+    function panel(id, key, fmtV, max) {
+      var host = document.getElementById(id), tip = R.tooltip(host);
+      R.dismissOutside(host, function () { tip.hide(); });
+      R.responsive(host, function (W, phase) {
+        var m = { top: 4, right: 44, bottom: 0, left: 86 }, bh = 22, gap = 10;
+        var H = data.length * (bh + gap) - gap, w = W - m.left - m.right;
+        var x = d3.scaleLinear().domain([0, max]).range([0, w]);
+        d3.select(host).select("svg").remove();
+        var svg = d3.select(host).insert("svg", ".r-tip").attr("width", W).attr("height", H + m.top).attr("role", "img")
+          .attr("aria-label", data.map(function (d) { return d.lab + ": " + fmtV(d[key]); }).join("; "));
+        var g = svg.append("g").attr("transform", "translate(" + m.left + "," + m.top + ")");
+        var rows = g.selectAll("g").data(data).join("g").attr("transform", function (d, i) { return "translate(0," + i * (bh + gap) + ")"; });
+        rows.append("text").attr("class", "tick-label").attr("x", -8).attr("y", bh / 2).attr("dy", "0.35em").attr("text-anchor", "end")
+          .style("fill", "var(--ink)").text(function (d) { return d.lab; });
+        var bars = rows.append("path").attr("class", "mark").style("fill", function (d, i) { return i === 0 ? "var(--red)" : "var(--grey-3)"; });
+        R.enter(bars, phase, function (s) { s.attr("d", R.barPathH(0, 0, 0, bh, 2)); },
+          function (s) { s.attr("d", function (d) { return R.barPathH(0, 0, Math.max(x(d[key]), 1.5), bh, 2); }); });
+        var lab = rows.append("text").attr("class", "series-label").attr("y", bh / 2).attr("dy", "0.35em")
+          .style("fill", function (d, i) { return i === 0 ? "var(--red)" : "var(--ink)"; }).text(function (d) { return fmtV(d[key]); });
+        R.enter(lab, phase, function (s) { s.attr("x", 6).style("opacity", 0); }, function (s) { s.attr("x", function (d) { return Math.max(x(d[key]), 1.5) + 6; }).style("opacity", 1); });
+        rows.on("pointermove pointerdown", function (ev, d) {
+          bars.classed("is-dimmed", function (b) { return b !== d; });
+          var p = d3.pointer(ev, host);
+          tip.show(R.tipHTML({ title: d.lab + " parti", value: fmtV(d[key]), rows: [
+            ["Punti nascita", fmt(d.n)], ["Con terapia intensiva", fmt(d.tin)], ["Con neonatologia", fmt(d.neo)], ["Parti", fmt(d.parti)], ["Pretermine", fmt(d.pre, 1) + "%"]] }), p[0], p[1]);
+        }).on("pointerleave", function (ev) { if (ev.pointerType === "mouse") { tip.hide(); bars.classed("is-dimmed", false); } });
+      });
+    }
+    panel("c-tin", "tinP", function (v) { return fmt(v, v < 1 ? 1 : 0) + "%"; }, 100);
+    panel("c-pre", "pre", function (v) { return fmt(v, 1) + "%"; }, 10);
+  }).catch(function (e) { R.fail("#c-tin", e); });
+})();
+</script>
+</body>
+</html>

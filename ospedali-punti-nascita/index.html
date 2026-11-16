@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ogni ospedale un punto – Radar QN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,700&display=swap">
+<link rel="stylesheet" href="../assets/radar.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="../assets/radar.js"></script>
+<style>
+  .grp-name { font-size: 14px; font-weight: 600; fill: var(--ink); }
+  .grp text { paint-order: stroke; stroke: var(--bg); stroke-width: 9px; stroke-linejoin: round; }
+  .grp-sub { font-size: 12px; fill: var(--ink-2); }
+</style>
+</head>
+<body>
+<main class="radar">
+  <header>
+    <h1 class="r-title" id="title">&nbsp;</h1>
+    <p class="r-sub">Punti nascita per numero di parti nel 2024. Ogni punto è un ospedale</p>
+  </header>
+
+  <div class="r-big" id="big" aria-hidden="true">
+    <span><span class="r-big__num" id="big-num">&nbsp;</span><span class="r-big__unit">%</span></span>
+    <span class="r-big__label" id="big-label"></span>
+  </div>
+
+  <figure class="r-chart" id="chart" style="margin-top:20px"></figure>
+  <div class="r-key">
+    <span><i class="sw" style="background:var(--ink-2);border-radius:50%"></i>Sotto i 500 parti</span>
+    <span><i class="sw" style="border:1.5px solid var(--ink-2);border-radius:50%;background:var(--bg)"></i>500 parti e più</span>
+  </div>
+
+  <p class="r-note" id="note"></p>
+
+  <footer class="r-foot">
+    <span>Fonte: Agenas (PNE, parti 2024), Mappa aree interne 2020</span>
+    <span>Elaborazione Radar – QN</span>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var R = Radar, fmt = R.fmt;
+  var AREA = { A: "polo", B: "polo intercomunale", C: "cintura", D: "area interna, comune intermedio", E: "area interna, comune periferico", F: "area interna, comune ultraperiferico" };
+
+  Promise.all([R.loadCSV("../data/punti-nascita-2024.csv"), R.loadCSV("../data/tempi-comuni.csv")]).then(function (res) {
+    var area = new Map(res[1].map(function (r) { return [r["id"], r["Area interna"]]; }));
+    var data = res[0].filter(function (r) { return r["Considerato punto nascita"] === "sì"; }).map(function (r) {
+      var a = area.get(r["id"]);
+      return { name: r["Struttura"], com: r["Comune"], prov: r["Provincia"], v: R.num(r["Parti 2024"]), a: a, inner: /^[DEF]$/.test(a) };
+    });
+    var G = [
+      { key: true, lab: "Aree interne", sub: "comuni intermedi, periferici e ultraperiferici", c: "var(--red)" },
+      { key: false, lab: "Poli e cintura", sub: "città e comuni vicini", c: "var(--blue)" }
+    ];
+    G.forEach(function (g) {
+      g.items = data.filter(function (d) { return d.inner === g.key; });
+      g.small = g.items.filter(function (d) { return d.v < 500; }).length;
+    });
+    var gi = G[0], go = G[1], share = gi.small / gi.items.length;
+    d3.select("#title").text("Nelle aree interne più di sei punti nascita su dieci sono sotto i 500 parti");
+    d3.select("#big-label").text("dei punti nascita nei comuni delle aree interne fa meno di 500 parti l'anno (" + gi.small + " su " + gi.items.length +
+      "). Nelle città e nei comuni vicini è il " + fmt(go.small / go.items.length * 100) + "% (" + go.small + " su " + go.items.length + ")");
+    var bigNum = d3.select("#big-num"), bigFmt = function (v) { return fmt(v * 100); };
+    if (R.reduced) bigNum.text(bigFmt(share)); else { bigNum.text(bigFmt(0)); R.onFirstView(document.getElementById("big"), function () { R.countUp(bigNum, share, bigFmt, "play"); }); }
+    d3.select("#note").text("Strutture con almeno 10 parti nel 2024. Aree interne: classificazione dei comuni per distanza dai servizi essenziali (Mappa aree interne 2020). " +
+      "Scala orizzontale logaritmica: ogni tacca vale dieci volte la precedente.");
+
+    var host = document.getElementById("chart"), tip = R.tooltip(host);
+    var clear = function () {};
+    R.dismissOutside(host, function () { tip.hide(); clear(); });
+
+    R.responsive(host, function (W, phase) {
+      var narrow = R.isNarrow(W);
+      var r = narrow ? 3.2 : 4.2, headH = 40;
+      G[0].bh = narrow ? 80 : 90; G[1].bh = narrow ? 140 : 160;
+      var m = { top: 22, right: 12, bottom: 30, left: 12 }, w = W - m.left - m.right;
+      var x = d3.scaleLog().domain([10, 7000]).range([0, w]);
+      var ih = G.length * headH + G[0].bh + G[1].bh, H = m.top + ih + m.bottom;
+      d3.select(host).select("svg").remove();
+      var svg = d3.select(host).insert("svg", ".r-tip").attr("width", W).attr("height", H).attr("role", "img")
+        .attr("aria-label", "Punti nascita per numero di parti. Aree interne: " + gi.small + " su " + gi.items.length + " sotto i 500 parti; poli e cintura: " + go.small + " su " + go.items.length + ".");
+      var g = svg.append("g").attr("transform", "translate(" + m.left + "," + m.top + ")");
+
+      // soglie
+      var an = g.append("g").attr("class", "anno");
+      [[500, narrow ? "500" : "500, minimo"], [1000, narrow ? "1.000" : "1.000, standard"]].forEach(function (s, i) {
+        var xx = Math.round(x(s[0])) + 0.5;
+        an.append("line").attr("class", "dash").attr("x1", xx).attr("x2", xx).attr("y1", -m.top + 16).attr("y2", 2);
+        an.append("line").attr("class", "dash").attr("x1", xx).attr("x2", xx).attr("y1", headH - 6).attr("y2", headH + G[0].bh);
+        an.append("line").attr("class", "dash").attr("x1", xx).attr("x2", xx).attr("y1", 2 * headH + G[0].bh - 6).attr("y2", ih);
+        an.append("text").attr("x", xx + (i ? 5 : -5)).attr("y", -m.top + 12).attr("text-anchor", i ? "start" : "end").attr("font-size", 12).text(s[1]);
+      });
+      var ticks = [10, 50, 100, 500, 1000, 5000];
+      var ax = g.append("g").attr("transform", "translate(0," + ih + ")");
+      ax.selectAll("text").data(ticks).join("text").attr("class", "tick-label").attr("x", function (d) { return x(d); }).attr("y", 18)
+        .attr("text-anchor", "middle").text(function (d, i) { return fmt(d) + (i === ticks.length - 1 ? " parti" : ""); });
+      ax.selectAll("line").data(ticks).join("line").attr("x1", function (d) { return Math.round(x(d)) + 0.5; }).attr("x2", function (d) { return Math.round(x(d)) + 0.5; })
+        .attr("y1", 0).attr("y2", 5).style("stroke", "var(--ink)");
+      g.append("line").attr("class", "baseline").attr("x1", 0).attr("x2", w).attr("y1", ih + 0.5).attr("y2", ih + 0.5).style("stroke", "var(--grid)");
+
+      var allDots = [];
+      G.forEach(function (grp, gi2) {
+        var y0 = gi2 ? headH + G[0].bh : 0, bandH = grp.bh;
+        var head = g.append("g").attr("class", "grp").attr("transform", "translate(0," + (y0 + 16) + ")");
+        var t = head.append("text");
+        t.append("tspan").attr("class", "grp-name").style("fill", grp.c).text(grp.lab);
+        t.append("tspan").attr("class", "grp-sub").text("  " + grp.small + " su " + grp.items.length + " sotto i 500 parti");
+        head.raise();
+        var cy = y0 + headH + bandH / 2;
+        var nodes = grp.items.map(function (d) { return { d: d, x: x(d.v), y: cy, tx: x(d.v) }; });
+        var sim = d3.forceSimulation(nodes).force("x", d3.forceX(function (n) { return n.tx; }).strength(1))
+          .force("y", d3.forceY(cy).strength(0.06)).force("c", d3.forceCollide(r + 0.6)).stop();
+        for (var i = 0; i < 220; i++) sim.tick();
+        nodes.forEach(function (n) { n.y = Math.max(y0 + headH + r, Math.min(y0 + headH + bandH - r, n.y)); });
+        var dots = g.append("g").selectAll("circle").data(nodes).join("circle").attr("class", "mark").attr("r", r)
+          .attr("cx", function (n) { return n.x; })
+          .style("fill", function (n) { return n.d.v < 500 ? grp.c : "var(--bg)"; })
+          .style("stroke", grp.c).attr("stroke-width", 1.25);
+        R.enter(dots, phase, function (s) { s.attr("cy", cy).style("opacity", 0); }, function (s) { s.attr("cy", function (n) { return n.y; }).style("opacity", 1); });
+        allDots.push(dots);
+      });
+
+      // legenda dei segni
+      function act(ev, n) {
+        allDots.forEach(function (s) { s.classed("is-dimmed", function (o) { return o !== n; }); });
+        var p = d3.pointer(ev, host);
+        tip.show(R.tipHTML({ title: n.d.name, value: fmt(n.d.v), unit: "parti nel 2024",
+          rows: [["Comune", n.d.com + " (" + n.d.prov + ")"]], note: AREA[n.d.a] ? "Classe del comune: " + AREA[n.d.a] + "." : null }), p[0], p[1]);
+      }
+      clear = function () { allDots.forEach(function (s) { s.classed("is-dimmed", false); }); };
+      var all = [].concat.apply([], allDots.map(function (s) { return s.data(); }));
+      var del = d3.Delaunay.from(all, function (n) { return n.x; }, function (n) { return n.y; });
+      g.append("rect").attr("class", "hit").attr("x", 0).attr("y", 0).attr("width", w).attr("height", ih)
+        .on("pointermove pointerdown", function (ev) {
+          var p = d3.pointer(ev, g.node()), i = del.find(p[0], p[1]), n = all[i];
+          if (Math.hypot(n.x - p[0], n.y - p[1]) > 24) { tip.hide(); clear(); return; }
+          act(ev, n);
+        })
+        .on("pointerleave", function (ev) { if (ev.pointerType === "mouse") { tip.hide(); clear(); } });
+    });
+  }).catch(function (e) { R.fail("#chart", e); });
+})();
+</script>
+</body>
+</html>
