@@ -27,7 +27,14 @@
   .sw--c0 { background: var(--grey-5); } .sw--c1 { background: var(--blue-5); } .sw--c2 { background: var(--blue-3); } .sw--c3 { background: var(--red-3); } .sw--c4 { background: var(--red-1); }
   .sw--pn { background: var(--ink); border-radius: 50%; width: 7px; height: 7px; }
   .sw--gone { border: 1.5px solid var(--ink); border-radius: 50%; width: 8px; height: 8px; background: var(--bg); }
-  #map svg { touch-action: manipulation; }
+  #map svg { touch-action: manipulation; overflow: hidden; }
+  .find { position: relative; flex: 1 1 200px; max-width: 280px; }
+  .find input { width: 100%; box-sizing: border-box; font: inherit; font-size: 13px; color: var(--ink); background: var(--bg); border: 1px solid var(--grid); border-radius: 6px; padding: 6px 10px; }
+  .find input::placeholder { color: var(--ink-2); }
+  .find ul { position: absolute; z-index: 10; left: 0; right: 0; top: 100%; margin: 4px 0 0; padding: 4px 0; list-style: none; background: var(--tip-bg, var(--bg)); border: 1px solid var(--grid); border-radius: 6px; max-height: 240px; overflow: auto; box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+  .find li { font-size: 13px; padding: 6px 10px; cursor: pointer; }
+  .find li small { color: var(--ink-2); }
+  .find li[aria-selected="true"], .find li:hover { background: var(--grid); }
 </style>
 </head>
 <body>
@@ -49,6 +56,10 @@
       <button type="button" data-s="t10" aria-pressed="false">2010</button>
     </div>
     <select id="zoom" aria-label="Zoom su una regione"><option value="">Tutta Italia</option></select>
+    <div class="find">
+      <input id="find" type="search" placeholder="Cerca il tuo comune" autocomplete="off" spellcheck="false" aria-label="Cerca il tuo comune" aria-autocomplete="list" aria-controls="sugg" role="combobox" aria-expanded="false">
+      <ul id="sugg" role="listbox" hidden></ul>
+    </div>
   </div>
   <p class="scn" id="scn"></p>
 
@@ -162,7 +173,8 @@
 
     var host = document.getElementById("map");
     var tip = R.tooltip(host);
-    var paint = function () {}, clearHl = function () {};
+    var paint = function () {}, clearHl = function () {}, focusFn = function () {}, focusId = null;
+    var featById = new Map(feats.map(function (f) { return [f.id, f]; }));
     R.dismissOutside(host, function () { tip.hide(); clearHl(); });
 
     function updateText() {
@@ -231,10 +243,23 @@
         (anim && !R.reduced ? g.transition().duration(600).ease(d3.easeCubicInOut) : g).attr("transform", t.toString());
         sizes();
       }
-      zoomTo(zoomReg, false);
-      sel.on("change", function () { zoomReg = this.value; zoomTo(zoomReg, true); });
+      sel.on("change", function () { zoomReg = this.value; focusId = null; document.getElementById("find").value = ""; zoomTo(zoomReg, true); });
 
-      function show(ev, f) {
+      focusFn = function (id, anim) {
+        var f = featById.get(id); if (!f) return;
+        var bb = path.bounds(f), bw = Math.max(bb[1][0] - bb[0][0], 1), bh = Math.max(bb[1][1] - bb[0][1], 1);
+        k = Math.max(1.5, Math.min(12, Math.min(W / (bw * 7), H / (bh * 7))));
+        var c = cen.get(id), t = d3.zoomIdentity.translate(W / 2 - k * c[0], H / 2 - k * c[1]).scale(k);
+        tip.hide();
+        var done = function () { showAt(f, t.applyX(c[0]), t.applyY(c[1])); };
+        if (anim && !R.reduced) g.transition().duration(650).ease(d3.easeCubicInOut).attr("transform", t.toString()).on("end", done);
+        else { g.attr("transform", t.toString()); done(); }
+        sizes();
+      };
+      if (focusId) focusFn(focusId, false); else zoomTo(zoomReg, false);
+
+      function show(ev, f) { var pt = d3.pointer(ev, host); showAt(f, pt[0], pt[1]); }
+      function showAt(f, px, py) {
         var d = f.d; if (!d) { tip.hide(); return; }
         hl.attr("d", path(f));
         var m = d[scen];
@@ -249,8 +274,7 @@
         if (d.parti) note.push("Nel comune " + fmt(d.parti) + " parti nel 2024.");
         if (d.gone) note.push("Aveva un reparto di ostetricia e ginecologia nel 2010.");
         if (d.isola) note.push("Isola minore: il tempo comprende il traghetto.");
-        var pt = d3.pointer(ev, host);
-        tip.show(R.tipHTML({ title: d.name + " (" + d.prov + ")", value: fmt(m), unit: "minuti", rows: rows, note: note.join(" ") || null }), pt[0], pt[1]);
+        tip.show(R.tipHTML({ title: d.name + " (" + d.prov + ")", value: fmt(m), unit: "minuti", rows: rows, note: note.join(" ") || null }), px, py);
       }
       clearHl = function () { hl.attr("d", null); };
       com.on("pointermove pointerdown", function (ev) { var f = ev.target.__data__; if (f) show(ev, f); })
@@ -261,7 +285,41 @@
       scen = this.getAttribute("data-s");
       d3.selectAll(".seg button").attr("aria-pressed", function () { return this.getAttribute("data-s") === scen ? "true" : "false"; });
       updateText(); tip.hide(); clearHl(); paint();
+      if (focusId) focusFn(focusId, false);
     });
+
+    // ---- cerca il tuo comune ----
+    function norm(s) { return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+    var index = feats.filter(function (f) { return f.d; }).map(function (f) {
+      return { id: f.id, name: f.d.name, prov: f.d.prov, k: norm(f.d.name) };
+    }).sort(function (a, b) { return d3.ascending(a.k, b.k); });
+    var inp = document.getElementById("find"), ul = d3.select("#sugg"), cur = [], act = -1;
+    function render() {
+      ul.selectAll("li").data(cur).join("li").attr("role", "option").attr("aria-selected", function (d, i) { return i === act ? "true" : "false"; })
+        .html(function (d) { return d.name.replace(/[<>&]/g, "") + " <small>" + d.prov + "</small>"; })
+        .on("pointerdown", function (ev, d) { ev.preventDefault(); choose(d); });
+      var open = cur.length > 0;
+      ul.attr("hidden", open ? null : true); inp.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+    function choose(d) {
+      inp.value = d.name + " (" + d.prov + ")"; cur = []; act = -1; render(); inp.blur();
+      sel.property("value", ""); zoomReg = ""; focusId = d.id; focusFn(d.id, true);
+    }
+    inp.addEventListener("input", function () {
+      var q = norm(inp.value); act = -1;
+      if (q.length < 2) { cur = []; render(); return; }
+      var a = index.filter(function (d) { return d.k.indexOf(q) === 0; });
+      var b = index.filter(function (d) { return d.k.indexOf(q) > 0; });
+      cur = a.concat(b).slice(0, 8); render();
+    });
+    inp.addEventListener("keydown", function (e) {
+      if (!cur.length) return;
+      if (e.key === "ArrowDown") { act = (act + 1) % cur.length; render(); e.preventDefault(); }
+      else if (e.key === "ArrowUp") { act = (act - 1 + cur.length) % cur.length; render(); e.preventDefault(); }
+      else if (e.key === "Enter") { choose(cur[Math.max(act, 0)]); e.preventDefault(); }
+      else if (e.key === "Escape") { cur = []; render(); }
+    });
+    inp.addEventListener("blur", function () { setTimeout(function () { cur = []; render(); }, 150); });
   }).catch(function (e) { R.fail("#map", e); });
 })();
 </script>
