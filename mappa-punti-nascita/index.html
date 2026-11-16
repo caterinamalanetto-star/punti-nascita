@@ -37,7 +37,7 @@
   .sw--gone { border: 1.5px solid var(--ink); border-radius: 50%; width: 8px; height: 8px; background: var(--bg); }
   #map svg { touch-action: manipulation; overflow: hidden; }
   .find { position: relative; flex: 1 1 200px; max-width: 280px; }
-  .find input { width: 100%; box-sizing: border-box; font: inherit; font-size: 13px; color: var(--ink); background: var(--bg); border: 1px solid var(--grid); border-radius: 6px; padding: 6px 10px; }
+  .find input { width: 100%; box-sizing: border-box; font: inherit; font-size: 13px; color: var(--ink); background: var(--bg); border: 1px solid var(--grey-4); border-radius: 6px; padding: 6px 10px; }
   .find input::placeholder { color: var(--ink-2); }
   .find ul { position: absolute; z-index: 10; left: 0; right: 0; top: 100%; margin: 4px 0 0; padding: 4px 0; list-style: none; background: var(--tip-bg, var(--bg)); border: 1px solid var(--grid); border-radius: 6px; max-height: 240px; overflow: auto; box-shadow: 0 4px 14px rgba(0,0,0,.08); }
   .find li { font-size: 13px; padding: 6px 10px; cursor: pointer; }
@@ -58,13 +58,6 @@
   </div>
 
   <div class="ctl">
-    <div class="seg" role="group" aria-label="Scenario">
-      <button type="button" data-s="t24" aria-pressed="true">Oggi</button>
-      <button type="button" data-s="t400" aria-pressed="false">Soglia 400</button>
-      <button type="button" data-s="t500" aria-pressed="false">Soglia 500</button>
-      <button type="button" data-s="t1000" aria-pressed="false">Standard 1.000</button>
-      <button type="button" data-s="t10" aria-pressed="false">2010</button>
-    </div>
     <select id="zoom" aria-label="Zoom su una regione"><option value="">Tutta Italia</option></select>
     <div class="find">
       <input id="find" type="search" placeholder="Cerca il tuo comune" autocomplete="off" spellcheck="false" aria-label="Cerca il tuo comune" aria-autocomplete="list" aria-controls="sugg" role="combobox" aria-expanded="false">
@@ -88,7 +81,7 @@
   <p class="r-note" id="note"></p>
 
   <footer class="r-foot">
-    <span>Fonte: Agenas (PNE, parti 2024), Istat (matrici delle distanze, confini 2026), ministero della Salute (posti letto 2010), Mappa aree interne 2020</span>
+    <span>Fonte: Agenas (PNE, parti 2024), Istat (matrici delle distanze, confini 2026, censimento 2020)</span>
     <span>Elaborazione Radar – QN</span>
   </footer>
 </main>
@@ -156,7 +149,7 @@
 
     var scen = "t24", zoomReg = "";
     var SC = {
-      t24: { lab: "Punti nascita attivi nel 2024 (almeno 10 parti l'anno).", pn: "Punto nascita 2024", gone: "Reparto di ostetricia nel 2010, oggi nessun punto nascita" },
+      t24: { lab: "Punti nascita attivi nel 2024 (almeno 10 parti l'anno).", pn: "Punto nascita", gone: null },
       t400: { lab: "Se restassero aperti solo i punti nascita con almeno 400 parti l'anno, la soglia proposta dalla Toscana.", pn: "Punto nascita con almeno 400 parti", gone: "Punto nascita sotto i 400 parti", th: 400 },
       t500: { lab: "Se restassero aperti solo i punti nascita con almeno 500 parti l'anno, il minimo dell'accordo Stato-Regioni del 2010.", pn: "Punto nascita con almeno 500 parti", gone: "Punto nascita sotto i 500 parti", th: 500 },
       t1000: { lab: "Se restassero aperti solo i punti nascita con almeno 1.000 parti l'anno, lo standard a cui le norme chiedono di tendere.", pn: "Punto nascita con almeno 1.000 parti", gone: "Punto nascita sotto i 1.000 parti", th: 1000 },
@@ -165,7 +158,7 @@
     function isPN(d, s) { return d && (SC[s].th ? (maxStr.get(d.id) || 0) >= SC[s].th : d[s] === 0); }
     function isGone(d, s) {
       if (!d) return false;
-      if (s === "t24") return d.gone;
+      if (s === "t24") return false;
       if (SC[s].th) return d.t24 === 0 && !isPN(d, s);
       return false;
     }
@@ -194,14 +187,14 @@
     function popOver(key, th) { var s = 0; byId.forEach(function (d) { if (d[key] > th) s += d.pop; }); return s; }
     var p45 = popOver("t24", 45), p45s = popOver("t500", 45), p45o = popOver("t10", 45);
     var bigNum = d3.select("#big-num"), bigFmt = function (v) { return fmt(v / 1e6, 1); };
-    d3.select("#big-label").text("residenti a più di 45 minuti dal punto nascita più vicino. Sarebbero " +
-      fmt(p45s / 1e6, 1) + " milioni con i soli punti nascita sopra i 500 parti");
+    d3.select("#big-label").text("residenti a più di 45 minuti di strada dal punto nascita più vicino. A più di mezz'ora sono " +
+      fmt(popOver("t24", 30) / 1e6, 1) + " milioni");
     if (R.reduced) bigNum.text(bigFmt(p45)); else { bigNum.text(bigFmt(0)); R.onFirstView(document.getElementById("big"), function () { R.countUp(bigNum, p45, bigFmt, "play"); }); }
 
     var nGone = 0; byId.forEach(function (d) { if (d.gone) nGone++; });
     var p30 = popOver("t24", 30);
     d3.select("#note").text("Tempi stradali Istat tra il centro di ogni comune e quello del comune con il punto nascita: per chi vive vicino a una grande città la distanza reale può essere minore. " +
-      "Nel 2024 i residenti a più di mezz'ora sono " + fmt(p30 / 1e6, 1) + " milioni; i comuni che avevano un reparto di ostetricia nel 2010 e oggi non hanno un punto nascita sono " + fmt(nGone) + ". " +
+      "Punti nascita: dati Agenas sui parti del 2024. " +
       "Sono esclusi gli ospedali con meno di 10 parti l'anno. Per le isole minori il tempo comprende il traghetto. Le linee tra comune e punto nascita sono in linea d'aria; i minuti sono quelli della strada.");
 
     var host = document.getElementById("map");
@@ -348,7 +341,7 @@
         var rows = [];
         var fm = function (v) { return v === 0 ? "nel comune" : fmt(v) + " min"; };
         if (m !== 0) rows.push(["Punto nascita più vicino", d.dname[scen]]);
-        ["t24", "t400", "t500", "t1000", "t10"].forEach(function (s) { rows.push([LAB[s], fm(d[s])]); });
+        if (m !== 0) rows.push(["Distanza", fmt(d.km, 1) + " km"]);
         var note = [];
         if (m === 0) note.push("Il punto nascita è nel comune.");
         else {
@@ -358,7 +351,6 @@
           else { var ps = fmt(p * 100); var a0 = art(ps); note.push(a0.charAt(0).toUpperCase() + a0.slice(1) + ps + "% dei residenti in Italia vive più vicino a una sala parto" + tail + "."); }
         }
         if (d.parti) note.push("Nel comune " + fmt(d.parti) + " parti nel 2024.");
-        if (d.gone) note.push("Aveva un reparto di ostetricia e ginecologia nel 2010.");
         if (d.isola) note.push("Isola minore: il tempo comprende il traghetto.");
         tip.show(R.tipHTML({ title: d.name + " (" + d.prov + ")", value: fmt(m), unit: "minuti", rows: rows, note: note.join(" ") || null }), px, py);
       }
