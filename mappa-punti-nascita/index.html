@@ -27,6 +27,10 @@
   .route line { stroke: var(--ink); stroke-linecap: round; pointer-events: none; }
   .route .r-now { stroke-dasharray: none; }
   .route circle { fill: var(--bg); stroke: var(--ink); pointer-events: none; }
+  .car .body { fill: var(--ink); }
+  .car .win { fill: var(--bg); }
+  .car .wheel { fill: var(--ink); stroke: var(--bg); }
+  .car text { font-weight: 700; fill: var(--ink); paint-order: stroke; stroke: var(--bg); stroke-linejoin: round; font-variant-numeric: tabular-nums; }
   .route text { font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: var(--bg); stroke-linejoin: round; pointer-events: none; }
   .sw--c0 { background: var(--grey-5); } .sw--c1 { background: var(--blue-5); } .sw--c2 { background: var(--blue-3); } .sw--c3 { background: var(--red-3); } .sw--c4 { background: var(--red-1); }
   .sw--pn { background: var(--ink); border-radius: 50%; width: 7px; height: 7px; }
@@ -198,7 +202,7 @@
     var p30 = popOver("t24", 30);
     d3.select("#note").text("Tempi stradali Istat tra il centro di ogni comune e quello del comune con il punto nascita: per chi vive vicino a una grande città la distanza reale può essere minore. " +
       "Nel 2024 i residenti a più di mezz'ora sono " + fmt(p30 / 1e6, 1) + " milioni; i comuni che avevano un reparto di ostetricia nel 2010 e oggi non hanno un punto nascita sono " + fmt(nGone) + ". " +
-      "Sono esclusi gli ospedali con meno di 10 parti l'anno. Per le isole minori il tempo comprende il traghetto.");
+      "Sono esclusi gli ospedali con meno di 10 parti l'anno. Per le isole minori il tempo comprende il traghetto. Le linee tra comune e punto nascita sono in linea d'aria; i minuti sono quelli della strada.");
 
     var host = document.getElementById("map");
     var tip = R.tooltip(host);
@@ -277,7 +281,7 @@
       }
       sel.on("change", function () { zoomReg = this.value; focusId = null; document.getElementById("find").value = ""; zoomTo(zoomReg, true); });
 
-      focusFn = function (id, anim) {
+      focusFn = function (id, anim, drive) {
         var f = featById.get(id); if (!f) return;
         var bb = path.bounds(f), c = cen.get(id);
         var xs = [bb[0][0], bb[1][0]], ys = [bb[0][1], bb[1][1]];
@@ -290,13 +294,37 @@
         var t = d3.zoomIdentity.translate(W / 2 - k * mx, cy0 - k * my).scale(k);
         tip.hide();
         // su mobile il tooltip va in basso, sotto il percorso
-        var done = function () { if (narrow) showAt(f, -14, H + 12, true); else showAt(f, t.applyX(c[0]), t.applyY(c[1])); };
+        var done = function () { if (narrow) showAt(f, -14, H + 12, true); else showAt(f, t.applyX(c[0]), t.applyY(c[1])); if (drive) driveCar(f); };
         if (anim && !R.reduced) g.transition().duration(650).ease(d3.easeCubicInOut).attr("transform", t.toString()).on("end", done);
         else { g.attr("transform", t.toString()); done(); }
         sizes();
       };
       if (focusId) focusFn(focusId, false); else zoomTo(zoomReg, false);
 
+      // macchinina dal comune cercato al punto nascita dello scenario (solo dopo una ricerca)
+      function driveCar(f) {
+        var d = f.d; if (!d || !(d[scen] > 0) || R.reduced) return;
+        var o = cen.get(d.id), t = cen.get(d.dest[scen]); if (!o || !t) return;
+        route.selectAll(".car").interrupt().remove();
+        var s = 1 / k, flip = t[0] < o[0] ? -1 : 1, mins = d[scen];
+        var car = route.append("g").attr("class", "car");
+        var body = car.append("g").attr("transform", "scale(" + (s * flip) + "," + s + ")");
+        // auto stilizzata, vista di lato (24 x 12)
+        body.append("path").attr("class", "body").attr("d", "M-12,2 L-12,-2 Q-12,-4 -10,-4 L-6,-4 L-3,-9 Q-2.5,-10 -1,-10 L5,-10 Q6.5,-10 7.5,-8.5 L10,-4 L11,-4 Q12,-4 12,-2 L12,2 Z");
+        body.append("path").attr("class", "win").attr("d", "M-4.5,-4.5 L-2,-8.5 L1.2,-8.5 L1.2,-4.5 Z M2.6,-4.5 L2.6,-8.5 L5,-8.5 Q5.8,-8.5 6.3,-7.6 L8,-4.5 Z");
+        body.append("circle").attr("class", "wheel").attr("cx", -7).attr("cy", 2.5).attr("r", 3).attr("stroke-width", 1.2);
+        body.append("circle").attr("class", "wheel").attr("cx", 7).attr("cy", 2.5).attr("r", 3).attr("stroke-width", 1.2);
+        var lab = car.append("text").attr("text-anchor", "middle").attr("y", 19 * s).attr("font-size", 13 * s).attr("stroke-width", 4 * s).text("0 min");
+        var dur = Math.max(1200, Math.min(4500, mins * 45));
+        car.attr("transform", "translate(" + o[0] + "," + o[1] + ")")
+          .transition().delay(250).duration(dur).ease(d3.easeSinInOut)
+          .attrTween("transform", function () { var ix = d3.interpolate(o, t); return function (u) { var p = ix(u); return "translate(" + p[0] + "," + p[1] + ")"; }; })
+          .tween("label", function () { return function (u) { lab.text(fmt(Math.round(mins * u)) + " min"); }; })
+          .on("end", function () {
+            lab.text(fmt(mins) + " min");
+            route.selectAll("text").filter(function () { return this.parentNode === route.node(); }).attr("dx", 15 * s);
+          });
+      }
       function show(ev, f) { var pt = d3.pointer(ev, host); showAt(f, pt[0], pt[1]); }
       function showAt(f, px, py) {
         var d = f.d; if (!d) { tip.hide(); return; }
@@ -361,7 +389,7 @@
     }
     function choose(d) {
       inp.value = d.name + " (" + d.prov + ")"; cur = []; act = -1; render(); inp.blur();
-      sel.property("value", ""); zoomReg = ""; focusId = d.id; focusFn(d.id, true);
+      sel.property("value", ""); zoomReg = ""; focusId = d.id; focusFn(d.id, true, true);
     }
     inp.addEventListener("input", function () {
       var q = norm(inp.value); act = -1;
