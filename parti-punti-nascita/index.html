@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meno nascite, meno ospedali – Radar QN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,700&display=swap">
+<link rel="stylesheet" href="../assets/radar.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="../assets/radar.js"></script>
+</head>
+<body>
+<main class="radar">
+  <header>
+    <h1 class="r-title">Un punto nascita su tre ha chiuso in quindici anni. Come i parti, calati di oltre un terzo</h1>
+    <p class="r-sub">Parti in ospedale e strutture che li registrano in Italia, 2010-2025</p>
+  </header>
+
+  <div class="r-big" id="big" aria-hidden="true">
+    <span><span class="r-big__num" id="big-num">&nbsp;</span></span>
+    <span class="r-big__label" id="big-label"></span>
+  </div>
+
+  <div class="r-panels">
+    <figure class="r-chart" id="c-punti">
+      <p class="r-chart__head">Punti nascita</p>
+      <p class="r-chart__sub">Strutture ospedaliere</p>
+    </figure>
+    <figure class="r-chart" id="c-parti">
+      <p class="r-chart__head">Parti</p>
+      <p class="r-chart__sub">In migliaia</p>
+    </figure>
+  </div>
+
+  <p class="r-note" id="note"></p>
+
+  <footer class="r-foot">
+    <span>Fonte: ministero della Salute, Rapporti CeDAP 2024 e 2025 (tab. 1)</span>
+    <span>Elaborazione Radar – QN</span>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var R = Radar, fmt = R.fmt;
+
+  R.loadCSV("../data/parti-punti-nascita.csv").then(function (rows) {
+    var data = rows.map(function (r) {
+      return { year: +r["Anno"], punti: R.num(r["Punti nascita"]), parti: R.num(r["Parti"]), note: r["Nota"] || "" };
+    }).filter(function (d) { return d.year && d.punti != null && d.parti != null; })
+      .sort(function (a, b) { return a.year - b.year; });
+    data.forEach(function (d) { d.ratio = d.parti / d.punti; });
+
+    var first = data[0], last = data[data.length - 1];
+    var dPunti = first.punti - last.punti;
+    var pPunti = dPunti / first.punti, pParti = (first.parti - last.parti) / first.parti;
+
+    // calo più forte in due anni (punti nascita) per l'annotazione
+    var drop = null;
+    for (var i = 2; i < data.length; i++) {
+      var dd = data[i - 2].punti - data[i].punti;
+      if (!drop || dd > drop.v) drop = { v: dd, from: data[i - 2], to: data[i] };
+    }
+
+    // ---- Big number ----
+    var bigNum = d3.select("#big-num");
+    d3.select("#big-label").text("punti nascita in meno dal " + first.year + " al " + last.year +
+      " (da " + fmt(first.punti) + " a " + fmt(last.punti) + ", −" + R.pct(pPunti) +
+      "). I parti sono scesi del " + R.pct(pParti));
+    var bigFmt = function (v) { return "−" + fmt(v, 0); };
+    if (R.reduced) bigNum.text(bigFmt(dPunti));
+    else {
+      bigNum.text(bigFmt(0));
+      R.onFirstView(document.getElementById("big"), function () { R.countUp(bigNum, dPunti, bigFmt, "play"); });
+    }
+
+    d3.select("#note").text("In media un punto nascita registrava " + fmt(first.ratio) + " parti nel " + first.year +
+      " e " + fmt(last.ratio) + " nel " + last.year + ": la rete si è ridotta quasi allo stesso ritmo delle nascite. " +
+      "Punti nascita: strutture che hanno inviato i dati CeDAP; parti: schede CeDAP pervenute.");
+
+    // ---- pannelli con crosshair condiviso ----
+    var panels = [];
+    function activateAll(d, src) { panels.forEach(function (p) { p.activate(d, p === src); }); }
+    function clearAll() { panels.forEach(function (p) { p.clear(); }); }
+
+    function panel(id, key, opts) {
+      var host = document.getElementById(id);
+      var tip = R.tooltip(host);
+      var P = { activate: function () {}, clear: function () {} };
+      panels.push(P);
+      R.dismissOutside(host, function () { tip.hide(); P.clear(); });
+
+      R.responsive(host, function (W, phase) {
+        var narrow = R.isNarrow(W);
+        var m = { top: 14, right: opts.mr, bottom: 28, left: 30 };
+        var H = narrow ? 240 : 270;
+        var w = W - m.left - m.right, h = H - m.top - m.bottom;
+        var val = function (d) { return d[key] / opts.div; };
+
+        var x = d3.scaleLinear().domain([first.year, last.year]).range([0, w]);
+        var y = d3.scaleLinear().domain([0, opts.max]).range([h, 0]);
+        var yTicks = d3.range(0, opts.max + 1, opts.step);
+
+        d3.select(host).select("svg").remove();
+        var svg = d3.select(host).insert("svg", ".r-tip")
+          .attr("width", W).attr("height", H).attr("role", "img")
+          .attr("aria-label", opts.label + ": da " + fmt(first[key]) + " nel " + first.year +
+            " a " + fmt(last[key]) + " nel " + last.year + ".");
+        svg.append("title").text(opts.label + ", " + first.year + "-" + last.year);
+        var g = svg.append("g").attr("transform", "translate(" + m.left + "," + m.top + ")");
+
+        var grid = g.append("g").attr("class", "grid");
+        grid.selectAll("line").data(yTicks).join("line")
+          .attr("x1", 0).attr("x2", w)
+          .attr("y1", function (d) { return Math.round(y(d)) + 0.5; })
+          .attr("y2", function (d) { return Math.round(y(d)) + 0.5; })
+          .attr("class", function (d) { return d === 0 ? "baseline" : null; });
+        g.append("g").selectAll("text").data(yTicks).join("text")
+          .attr("class", "tick-label").attr("x", -8).attr("y", function (d) { return y(d); })
+          .attr("dy", "0.35em").attr("text-anchor", "end").text(function (d) { return fmt(d); });
+
+        var step = 5;
+        var yrs = data.map(function (d) { return d.year; }).filter(function (yv) { return (yv - first.year) % step === 0 || yv === last.year; });
+        if (yrs.length > 1 && yrs[yrs.length - 1] - yrs[yrs.length - 2] < 3) yrs.splice(yrs.length - 2, 1);
+        var xa = g.append("g").attr("transform", "translate(0," + h + ")");
+        xa.selectAll("line").data(yrs).join("line")
+          .attr("x1", function (d) { return Math.round(x(d)) + 0.5; }).attr("x2", function (d) { return Math.round(x(d)) + 0.5; })
+          .attr("y1", 0).attr("y2", 5).style("stroke", "var(--ink)");
+        xa.selectAll("text").data(yrs).join("text")
+          .attr("class", "tick-label").attr("x", function (d) { return x(d); }).attr("y", 20)
+          .attr("text-anchor", function (d, i) { return i === 0 ? "start" : (d === last.year ? "end" : "middle"); })
+          .text(function (d) { return d; });
+
+        // annotazione (solo nel pannello dei punti nascita)
+        if (opts.anno && drop) {
+          var an = g.append("g").attr("class", "anno");
+          var ax = x(drop.to.year), ay = y(val(drop.to));
+          var tw = Math.max(120, Math.min(200, w - ax + 4));
+          var tx = Math.min(ax - 4, w - tw), ty = ay + 44;
+          an.append("text").attr("x", tx).attr("y", ty).attr("dy", "0.7em")
+            .text("−" + fmt(drop.v) + " punti nascita in due anni, dal " + drop.from.year + " al " + drop.to.year)
+            .call(R.wrap, tw);
+          an.append("line").attr("x1", ax).attr("x2", ax).attr("y1", ay + 5).attr("y2", ty - 7);
+          an.append("circle").attr("cx", ax).attr("cy", ay).attr("r", 2.25);
+          R.enter(an, phase, function (s) { s.style("opacity", 0); }, function (s) { s.style("opacity", 1); }, R.DUR * 0.6);
+        }
+
+        var line = d3.line().curve(d3.curveMonotoneX)
+          .x(function (d) { return x(d.year); }).y(function (d) { return y(val(d)); });
+        var path = g.append("path").datum(data)
+          .style("fill", "none").style("stroke", "var(--blue)").attr("stroke-width", 2.25)
+          .attr("stroke-linejoin", "round").attr("stroke-linecap", "round").attr("d", line);
+        var L = path.node().getTotalLength();
+        R.enter(path, phase,
+          function (s) { s.attr("stroke-dasharray", L + " " + L).attr("stroke-dashoffset", L); },
+          function (s) { s.attr("stroke-dashoffset", 0); });
+
+        var cross = g.append("line").attr("class", "crosshair").attr("y1", 0).attr("y2", h).style("opacity", 0);
+
+        var rr = function (d) { return d === last ? 4.5 : 2.5; };
+        var pts = g.append("g").selectAll("circle").data(data).join("circle")
+          .attr("class", "mark").attr("cx", function (d) { return x(d.year); }).attr("cy", function (d) { return y(val(d)); })
+          .attr("r", rr).style("fill", function (d) { return d === last ? "var(--red)" : "var(--blue)"; })
+          .style("stroke", "var(--bg)").attr("stroke-width", function (d) { return d === last ? 1.5 : 0; });
+        pts.each(function (d) {
+          var s = d3.select(this), delay = (x(d.year) / w) * R.DUR;
+          R.enter(s, phase, function (s) { s.style("opacity", 0); }, function (s) { s.style("opacity", 1); }, delay);
+        });
+
+        // etichette dirette: primo e ultimo valore
+        var labs = g.append("g");
+        labs.append("text").attr("class", "series-label").attr("x", x(first.year)).attr("y", y(val(first)) - 10)
+          .text(opts.short(first[key]));
+        labs.append("text").attr("class", "series-label").attr("x", x(last.year) + 8).attr("y", y(val(last)))
+          .attr("dy", "0.35em").style("fill", "var(--red)").text(opts.short(last[key]));
+        R.enter(labs, phase, function (s) { s.style("opacity", 0); }, function (s) { s.style("opacity", 1); }, R.DUR * 0.85);
+
+        P.activate = function (d, own) {
+          var cx = x(d.year), cy = y(val(d));
+          cross.attr("x1", cx).attr("x2", cx).style("opacity", 1);
+          pts.attr("r", function (p) { return p === d ? 5.5 : rr(p); }).classed("is-dimmed", function (p) { return p !== d; });
+          if (own) {
+            tip.show(R.tipHTML({
+              title: String(d.year),
+              value: fmt(d[key]),
+              unit: opts.unit,
+              rows: [[opts.otherLabel, fmt(d[opts.other])], ["Parti per punto nascita", fmt(d.ratio)]],
+              note: d.note || null
+            }), cx + m.left, cy + m.top);
+          } else tip.hide();
+        };
+        P.clear = function () {
+          cross.style("opacity", 0);
+          pts.attr("r", rr).classed("is-dimmed", false);
+          tip.hide();
+        };
+        function nearest(ev) {
+          var mx = d3.pointer(ev, g.node())[0];
+          return d3.least(data, function (d) { return Math.abs(x(d.year) - mx); });
+        }
+        g.append("rect").attr("class", "hit")
+          .attr("x", -6).attr("y", -m.top).attr("width", w + 12).attr("height", h + m.top)
+          .on("pointermove pointerdown", function (ev) { activateAll(nearest(ev), P); })
+          .on("pointerleave", function (ev) { if (ev.pointerType === "mouse") clearAll(); });
+      });
+    }
+
+    panel("c-punti", "punti", {
+      div: 1, max: 600, step: 200, label: "Punti nascita in Italia", unit: "punti nascita",
+      other: "parti", otherLabel: "Parti", short: function (v) { return fmt(v); }, anno: true, mr: 36
+    });
+    panel("c-parti", "parti", {
+      div: 1000, max: 600, step: 200, label: "Parti in ospedale in Italia", unit: "parti",
+      other: "punti", otherLabel: "Punti nascita", short: function (v) { return fmt(v / 1000) + " mila"; }, mr: 62
+    });
+  }).catch(function (e) { R.fail("#c-punti", e); });
+})();
+</script>
+</body>
+</html>
