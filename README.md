@@ -30,3 +30,4 @@
 - **Siena**: stesso calcolo per i 35 comuni della provincia togliendo i punti nascita di Montepulciano (Nottola) e Poggibonsi (Campostaggia); restano tutti gli altri, anche fuori regione (Orvieto, Arezzo).
 - Grafico 1: la serie CeDAP conta le strutture ospedaliere (un'azienda con più sedi conta una volta): 347 strutture nel 2025 a fronte di 382 punti nascita.
 - Nomi dei comuni e sigle delle province: elenco ufficiale Istat al 1° gennaio 2026 (comprese le nuove province sarde del 2025). Nomi delle strutture: quelli del PNE con maiuscole e accenti normalizzati; l'originale è nella colonna `Struttura (PNE)`.
+- Mappa: scenari aggiuntivi "Soglia 400" (proposta della Toscana) e "Standard 1.000", calcolati come la soglia 500 sulle strutture con almeno 400 o 1.000 parti nel 2024. Nel tooltip, la frase sulla quota di residenti più vicini o più lontani è calcolata sui residenti al censimento 2020 di tutti i comuni.

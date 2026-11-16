@@ -12,7 +12,7 @@
 <script src="../assets/radar.js"></script>
 <style>
   .ctl { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin: 22px 0 6px; }
-  .seg { display: inline-flex; border: 1px solid var(--grid); border-radius: 999px; padding: 2px; }
+  .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--grid); border-radius: 16px; padding: 2px; }
   .seg button { font: inherit; font-size: 13px; color: var(--ink-2); background: none; border: 0; border-radius: 999px; padding: 5px 12px; cursor: pointer; }
   .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); font-weight: 600; }
   .ctl select { font: inherit; font-size: 13px; color: var(--ink); background: var(--bg); border: 1px solid var(--grid); border-radius: 6px; padding: 5px 8px; }
@@ -24,6 +24,10 @@
   .hl { fill: none; stroke: var(--ink); pointer-events: none; }
   .pn { fill: var(--ink); stroke: var(--bg); pointer-events: none; }
   .gone { fill: var(--bg); stroke: var(--ink); pointer-events: none; }
+  .route line { stroke: var(--ink); stroke-linecap: round; pointer-events: none; }
+  .route .r-now { stroke-dasharray: none; }
+  .route circle { fill: var(--bg); stroke: var(--ink); pointer-events: none; }
+  .route text { font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: var(--bg); stroke-linejoin: round; pointer-events: none; }
   .sw--c0 { background: var(--grey-5); } .sw--c1 { background: var(--blue-5); } .sw--c2 { background: var(--blue-3); } .sw--c3 { background: var(--red-3); } .sw--c4 { background: var(--red-1); }
   .sw--pn { background: var(--ink); border-radius: 50%; width: 7px; height: 7px; }
   .sw--gone { border: 1.5px solid var(--ink); border-radius: 50%; width: 8px; height: 8px; background: var(--bg); }
@@ -52,7 +56,9 @@
   <div class="ctl">
     <div class="seg" role="group" aria-label="Scenario">
       <button type="button" data-s="t24" aria-pressed="true">Oggi</button>
-      <button type="button" data-s="t500" aria-pressed="false">Soglia 500 parti</button>
+      <button type="button" data-s="t400" aria-pressed="false">Soglia 400</button>
+      <button type="button" data-s="t500" aria-pressed="false">Soglia 500</button>
+      <button type="button" data-s="t1000" aria-pressed="false">Standard 1.000</button>
       <button type="button" data-s="t10" aria-pressed="false">2010</button>
     </div>
     <select id="zoom" aria-label="Zoom su una regione"><option value="">Tutta Italia</option></select>
@@ -98,9 +104,10 @@
     res[2].forEach(function (r) {
       byId.set(r["id"], {
         id: r["id"], name: r["Comune"], prov: r["Provincia"], reg: r["Regione"], pop: R.num(r["Residenti 2020"]),
-        t10: R.num(r["Minuti 2010"]), t24: R.num(r["Minuti 2024"]), t500: R.num(r["Minuti soglia 500"]),
-        km: R.num(r["Km 2024"]), d24: r["id punto nascita 2024"], d500: r["id punto nascita soglia 500"],
-        n24: r["Comune del punto nascita 2024"], n500: r["Comune del punto nascita soglia 500"],
+        t10: R.num(r["Minuti 2010"]), t24: R.num(r["Minuti 2024"]), t400: R.num(r["Minuti soglia 400"]),
+        t500: R.num(r["Minuti soglia 500"]), t1000: R.num(r["Minuti standard 1000"]), km: R.num(r["Km 2024"]),
+        dest: { t10: r["id punto nascita 2010"], t24: r["id punto nascita 2024"], t400: r["id punto nascita soglia 400"], t500: r["id punto nascita soglia 500"], t1000: r["id punto nascita standard 1000"] },
+        dname: { t10: r["Comune del punto nascita 2010"], t24: r["Comune del punto nascita 2024"], t400: r["Comune del punto nascita soglia 400"], t500: r["Comune del punto nascita soglia 500"], t1000: r["Comune del punto nascita standard 1000"] },
         parti: R.num(r["Parti nel comune 2024"]) || 0, gone: r["Reparto chiuso"] === "sì", isola: r["Isola minore"] === "sì"
       });
     });
@@ -146,16 +153,38 @@
     var scen = "t24", zoomReg = "";
     var SC = {
       t24: { lab: "Punti nascita attivi nel 2024 (almeno 10 parti l'anno).", pn: "Punto nascita 2024", gone: "Reparto di ostetricia nel 2010, oggi nessun punto nascita" },
-      t500: { lab: "Se restassero aperti solo i punti nascita con almeno 500 parti l'anno, la soglia dell'accordo Stato-Regioni del 2010.", pn: "Punto nascita con almeno 500 parti", gone: "Punto nascita sotto i 500 parti" },
+      t400: { lab: "Se restassero aperti solo i punti nascita con almeno 400 parti l'anno, la soglia proposta dalla Toscana.", pn: "Punto nascita con almeno 400 parti", gone: "Punto nascita sotto i 400 parti", th: 400 },
+      t500: { lab: "Se restassero aperti solo i punti nascita con almeno 500 parti l'anno, il minimo dell'accordo Stato-Regioni del 2010.", pn: "Punto nascita con almeno 500 parti", gone: "Punto nascita sotto i 500 parti", th: 500 },
+      t1000: { lab: "Se restassero aperti solo i punti nascita con almeno 1.000 parti l'anno, lo standard a cui le norme chiedono di tendere.", pn: "Punto nascita con almeno 1.000 parti", gone: "Punto nascita sotto i 1.000 parti", th: 1000 },
       t10: { lab: "Reparti di ostetricia e ginecologia attivi nel 2010 (non tutti facevano parti: il dato sottostima le distanze di allora).", pn: "Reparto di ostetricia 2010", gone: null }
     };
-    function isPN(d, s) { return d && (s === "t500" ? (maxStr.get(d.id) || 0) >= 500 : d[s] === 0); }
+    function isPN(d, s) { return d && (SC[s].th ? (maxStr.get(d.id) || 0) >= SC[s].th : d[s] === 0); }
     function isGone(d, s) {
       if (!d) return false;
       if (s === "t24") return d.gone;
-      if (s === "t500") return d.t24 === 0 && !isPN(d, "t500");
+      if (SC[s].th) return d.t24 === 0 && !isPN(d, s);
       return false;
     }
+    var LAB = { t24: "Oggi", t400: "Soglia 400 parti", t500: "Soglia 500 parti", t1000: "Standard 1.000 parti", t10: "Nel 2010" };
+    // quota di residenti più vicini di m minuti, per scenario
+    var totPop = 0; byId.forEach(function (d) { totPop += d.pop; });
+    var CDF = {};
+    Object.keys(LAB).forEach(function (s) {
+      var acc = new Map(); byId.forEach(function (d) { acc.set(d[s], (acc.get(d[s]) || 0) + d.pop); });
+      var ks = Array.from(acc.keys()).sort(d3.ascending), cum = 0, below = new Map(), above = new Map();
+      ks.forEach(function (m) { below.set(m, cum); cum += acc.get(m); above.set(m, cum); });
+      above.forEach(function (v, m) { above.set(m, totPop - v); });
+      CDF[s] = { below: below, above: above };
+    });
+    function closer(d, s) { return CDF[s].below.get(d[s]) / totPop; }
+    // articolo davanti a una percentuale: lo 0,2%, l'8%, l'11%, il 4%
+    function art(n) {
+      var i = n.split(",")[0];
+      if (i === "0") return "lo ";
+      if (i.charAt(0) === "8" || i === "1" || i === "11") return "l'";
+      return "il ";
+    }
+    function farther(d, s) { return CDF[s].above.get(d[s]) / totPop; }
 
     // big number
     function popOver(key, th) { var s = 0; byId.forEach(function (d) { if (d[key] > th) s += d.pop; }); return s; }
@@ -205,12 +234,16 @@
       var paths = com.selectAll("path").data(feats).join("path").attr("d", path);
       var regL = g.append("path").datum({ type: "FeatureCollection", features: regs }).attr("class", "reg").attr("d", path);
       var hl = g.append("path").attr("class", "hl");
+      var route = g.append("g").attr("class", "route");
       var cen = new Map(); feats.forEach(function (f) { cen.set(f.id, path.centroid(f)); });
       var mk = g.append("g");
 
       var k = 1;
       function sizes() {
         regL.attr("stroke-width", 0.9 / k); hl.attr("stroke-width", 2 / k);
+        route.selectAll("line").attr("stroke-width", 1.6 / k).attr("stroke-dasharray", function () { return this.classList.contains("r-now") ? null : (4 / k) + " " + (3 / k); });
+        route.selectAll("circle").attr("r", 4 / k).attr("stroke-width", 1.5 / k);
+        route.selectAll("text").attr("font-size", 12 / k).attr("stroke-width", 4 / k).attr("dx", 6 / k).attr("dy", -6 / k);
         mk.selectAll(".pn").attr("r", (narrow ? 1.5 : 1.9) / Math.sqrt(k) / Math.sqrt(k) * Math.min(Math.sqrt(k), 2.2)).attr("stroke-width", 0.5 / k);
         mk.selectAll(".gone").attr("r", (narrow ? 1.7 : 2.2) / k * Math.min(Math.sqrt(k), 2.2)).attr("stroke-width", 1 / k);
       }
@@ -238,7 +271,7 @@
           var cx = (bb[0][0] + bb[1][0]) / 2, cy = (bb[0][1] + bb[1][1]) / 2;
           t = d3.zoomIdentity.translate(W / 2 - k * cx, H / 2 - k * cy).scale(k);
         }
-        tip.hide(); hl.attr("d", null);
+        tip.hide(); hl.attr("d", null); route.selectAll("*").remove();
         (anim && !R.reduced ? g.transition().duration(600).ease(d3.easeCubicInOut) : g).attr("transform", t.toString());
         sizes();
       }
@@ -246,11 +279,18 @@
 
       focusFn = function (id, anim) {
         var f = featById.get(id); if (!f) return;
-        var bb = path.bounds(f), bw = Math.max(bb[1][0] - bb[0][0], 1), bh = Math.max(bb[1][1] - bb[0][1], 1);
-        k = Math.max(1.5, Math.min(12, Math.min(W / (bw * 7), H / (bh * 7))));
-        var c = cen.get(id), t = d3.zoomIdentity.translate(W / 2 - k * c[0], H / 2 - k * c[1]).scale(k);
+        var bb = path.bounds(f), c = cen.get(id);
+        var xs = [bb[0][0], bb[1][0]], ys = [bb[0][1], bb[1][1]];
+        if (f.d) ["t24", scen].forEach(function (s) { var p = cen.get(f.d.dest[s]); if (p) { xs.push(p[0]); ys.push(p[1]); } });
+        var x0 = d3.min(xs), x1 = d3.max(xs), y0 = d3.min(ys), y1 = d3.max(ys);
+        var bw = Math.max(x1 - x0, (bb[1][0] - bb[0][0]) * 5, 1), bh = Math.max(y1 - y0, (bb[1][1] - bb[0][1]) * 5, 1);
+        var areaH = narrow ? H * 0.42 : H, cy0 = narrow ? H * 0.24 : H / 2;
+        k = Math.max(1.5, Math.min(12, Math.min(W / (bw * 1.6), areaH / (bh * 1.6))));
+        var mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
+        var t = d3.zoomIdentity.translate(W / 2 - k * mx, cy0 - k * my).scale(k);
         tip.hide();
-        var done = function () { showAt(f, t.applyX(c[0]), t.applyY(c[1])); };
+        // su mobile il tooltip va in basso, sotto il percorso
+        var done = function () { if (narrow) showAt(f, -14, H + 12, true); else showAt(f, t.applyX(c[0]), t.applyY(c[1])); };
         if (anim && !R.reduced) g.transition().duration(650).ease(d3.easeCubicInOut).attr("transform", t.toString()).on("end", done);
         else { g.attr("transform", t.toString()); done(); }
         sizes();
@@ -262,20 +302,39 @@
         var d = f.d; if (!d) { tip.hide(); return; }
         hl.attr("d", path(f));
         var m = d[scen];
-        var dest = scen === "t500" ? d.n500 : (scen === "t24" ? d.n24 : null);
+        // percorso: oggi (linea piena) e scenario scelto (tratteggiata)
+        route.selectAll("*").remove(); route.raise();
+        var o = cen.get(d.id), legs = [];
+        if (scen !== "t24" && d[scen] > 0) legs.push({ s: scen, now: false });
+        if (d.t24 > 0) legs.push({ s: "t24", now: true });
+        legs.forEach(function (L) {
+          var t = cen.get(d.dest[L.s]); if (!t) return;
+          route.append("line").attr("class", L.now ? "r-now" : "r-scn").attr("x1", o[0]).attr("y1", o[1]).attr("x2", t[0]).attr("y2", t[1]);
+        });
+        legs.forEach(function (L) {
+          var t = cen.get(d.dest[L.s]); if (!t) return;
+          route.append("circle").attr("cx", t[0]).attr("cy", t[1]);
+          route.append("text").attr("x", t[0]).attr("y", t[1]).text(d.dname[L.s]);
+        });
+        sizes();
         var rows = [];
-        if (m !== 0 && dest) rows.push(["Punto nascita più vicino", dest]);
         var fm = function (v) { return v === 0 ? "nel comune" : fmt(v) + " min"; };
-        rows.push(["Oggi", fm(d.t24)]);
-        rows.push(["Soglia 500 parti", fm(d.t500)]);
-        rows.push(["Nel 2010", fm(d.t10)]);
+        if (m !== 0) rows.push(["Punto nascita più vicino", d.dname[scen]]);
+        ["t24", "t400", "t500", "t1000", "t10"].forEach(function (s) { rows.push([LAB[s], fm(d[s])]); });
         var note = [];
+        if (m === 0) note.push("Il punto nascita è nel comune.");
+        else {
+          var p = closer(d, scen), q = farther(d, scen), tail = scen === "t24" ? "" : " in questo scenario";
+          if (q < 0.001) note.push("Meno dello 0,1% dei residenti in Italia vive più lontano da una sala parto" + tail + ".");
+          else if (q < 0.1) { var qs = fmt(q * 100, 1); note.push("Solo " + art(qs) + qs + "% dei residenti in Italia vive più lontano da una sala parto" + tail + "."); }
+          else { var ps = fmt(p * 100); var a0 = art(ps); note.push(a0.charAt(0).toUpperCase() + a0.slice(1) + ps + "% dei residenti in Italia vive più vicino a una sala parto" + tail + "."); }
+        }
         if (d.parti) note.push("Nel comune " + fmt(d.parti) + " parti nel 2024.");
         if (d.gone) note.push("Aveva un reparto di ostetricia e ginecologia nel 2010.");
         if (d.isola) note.push("Isola minore: il tempo comprende il traghetto.");
         tip.show(R.tipHTML({ title: d.name + " (" + d.prov + ")", value: fmt(m), unit: "minuti", rows: rows, note: note.join(" ") || null }), px, py);
       }
-      clearHl = function () { hl.attr("d", null); };
+      clearHl = function () { hl.attr("d", null); route.selectAll("*").remove(); };
       com.on("pointermove pointerdown", function (ev) { var f = ev.target.__data__; if (f) show(ev, f); })
         .on("pointerleave", function (ev) { if (ev.pointerType === "mouse") { tip.hide(); clearHl(); } });
     });
