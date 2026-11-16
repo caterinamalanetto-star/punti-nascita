@@ -2,7 +2,7 @@
 <style>body{font-family:'Libre Franklin',Arial,sans-serif;max-width:1180px;margin:24px auto;padding:0 16px;color:#1a1a1a;background:#f7f8f9}h1,h2{font-family:Newsreader,Georgia,serif}.row{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}iframe{border:1px solid #e3e3e3;background:#f7f8f9}pre{background:#fff;border:1px solid #e3e3e3;padding:12px;white-space:pre-wrap;word-break:break-all;font-size:12px}section{margin:0 0 48px}</style></head>
 <body><h1>Punti nascita – dataviz Radar</h1><div id="list"></div>
 <script>
-var V=[["parti-punti-nascita","Meno nascite, meno ospedali",620,1080],["mappa-punti-nascita","Dove non si nasce più",1300,1190],["distanze-parto","Quanto è lontano il primo parto",1100,1460]];
+var V=[["parti-punti-nascita","Meno nascite, meno ospedali",620,1080],["mappa-punti-nascita","Dove non si nasce più",1300,1190],["distanze-parto","Quanto è lontano il primo parto",1100,1460],["siena-nottola","Senza Nottola e Campostaggia",1170,1820]];
 var base=location.href.replace(/index\.html$/,"").replace(/\/?$/,"/");
 fetch("assets/embed.min.js").then(function(r){return r.text()}).then(function(js){
  js=js.trim().replace("https://ACCOUNT.github.io",location.origin);

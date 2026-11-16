@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Senza Nottola e Campostaggia – Radar QN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,700&display=swap">
+<link rel="stylesheet" href="../assets/radar.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="../assets/radar.js"></script>
+<style>
+  .sw--d24 { background: var(--blue); border-radius: 50%; }
+  .sw--d0 { background: var(--red); border-radius: 50%; }
+  .row-name { font-size: 13px; font-weight: 600; fill: var(--ink); }
+  .row-sub { font-size: 12px; fill: var(--ink-2); }
+</style>
+</head>
+<body>
+<main class="radar">
+  <header>
+    <h1 class="r-title" id="title">&nbsp;</h1>
+    <p class="r-sub">Provincia di Siena, minuti di strada dal centro del comune al punto nascita più vicino: oggi e se chiudessero i punti nascita di Nottola (Montepulciano) e Campostaggia (Poggibonsi)</p>
+  </header>
+
+  <div class="r-big" id="big" aria-hidden="true">
+    <span><span class="r-big__num" id="big-num">&nbsp;</span> <span class="r-big__unit">mila</span></span>
+    <span class="r-big__label" id="big-label"></span>
+  </div>
+
+  <figure class="r-chart" id="chart" style="margin-top:24px">
+    <p class="r-chart__head">I comuni in cui la strada si allunga</p>
+    <p class="r-chart__sub">Accanto a ogni comune, il punto nascita più vicino dopo le chiusure</p>
+  </figure>
+  <div class="r-key">
+    <span><i class="sw sw--d24"></i>Oggi</span>
+    <span><i class="sw sw--d0"></i>Senza Nottola e Campostaggia</span>
+  </div>
+
+  <p class="r-note" id="note"></p>
+
+  <footer class="r-foot">
+    <span>Fonte: Agenas (PNE, parti 2024), Istat (matrici delle distanze, censimento 2020)</span>
+    <span>Elaborazione Radar – QN</span>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var R = Radar, fmt = R.fmt;
+  var C_NOW = "Minuti oggi", C_NEW = "Minuti senza Nottola e Campostaggia";
+
+  R.loadCSV("../data/siena-nottola.csv").then(function (rows) {
+    var all = rows.map(function (r) {
+      return { name: r["Comune"], pop: R.num(r["Residenti 2020"]), now: R.num(r[C_NOW]), nw: R.num(r[C_NEW]),
+        dNow: r["Punto nascita oggi"], dNew: r["Punto nascita senza Nottola e Campostaggia"] };
+    });
+    var data = all.filter(function (d) { return d.nw > d.now; })
+      .sort(function (a, b) { return b.nw - a.nw || b.pop - a.pop; });
+
+    function over(k, th) { return d3.sum(all, function (d) { return d[k] > th ? d.pop : 0; }); }
+    var after = over("nw", 45), before = over("now", 45);
+    var maxRow = data[0];
+    d3.select("#title").text("Senza Nottola e Campostaggia, " + fmt(Math.round(after / 1000)) + " mila persone a più di 45 minuti dalla sala parto");
+    d3.select("#big-label").text("residenti in provincia di Siena a più di 45 minuti dal punto nascita più vicino se chiudessero i due reparti. Oggi sono " +
+      fmt(Math.round(before / 1000)) + " mila");
+    var bigNum = d3.select("#big-num"), bigFmt = function (v) { return fmt(Math.round(v / 1000)); };
+    if (R.reduced) bigNum.text(bigFmt(after)); else { bigNum.text(bigFmt(0)); R.onFirstView(document.getElementById("big"), function () { R.countUp(bigNum, after, bigFmt, "play"); }); }
+
+    d3.select("#note").text("Tempi stradali Istat tra il centro del comune e quello del comune con il punto nascita: da frazioni e case sparse il viaggio può essere più lungo. " +
+      "Il punto nascita più vicino può trovarsi fuori provincia o fuori regione (Orvieto è in Umbria). Restano aperti tutti gli altri punti nascita con almeno 10 parti nel 2024. " +
+      "Sono mostrati i " + data.length + " comuni su " + all.length + " in cui il tempo aumenta; il più lontano dopo le chiusure è " + maxRow.name + " (" + fmt(maxRow.nw) + " minuti).");
+
+    var host = document.getElementById("chart"), tip = R.tooltip(host);
+    var clear = function () {};
+    R.dismissOutside(host, function () { tip.hide(); clear(); });
+    R.responsive(host, function (W, phase) {
+      var narrow = R.isNarrow(W);
+      var m = { top: narrow ? 14 : 8, right: narrow ? 96 : 120, bottom: 28, left: narrow ? 10 : 168 }, rh = narrow ? 48 : 30;
+      var H = m.top + data.length * rh + m.bottom, w = W - m.left - m.right, ih = data.length * rh;
+      var xMax = Math.ceil(d3.max(data, function (d) { return d.nw; }) / 15) * 15;
+      var x = d3.scaleLinear().domain([0, xMax]).range([0, w]);
+      var ticks = d3.range(0, xMax + 1, narrow ? 30 : 15);
+      d3.select(host).select("svg").remove();
+      var svg = d3.select(host).insert("svg", ".r-tip").attr("width", W).attr("height", H).attr("role", "img")
+        .attr("aria-label", "Minuti fino al punto nascita più vicino, oggi e senza Nottola e Campostaggia, in " + data.length + " comuni della provincia di Siena. " +
+          data.map(function (d) { return d.name + " da " + d.now + " a " + d.nw; }).join("; "));
+      var g = svg.append("g").attr("transform", "translate(" + m.left + "," + m.top + ")");
+      g.append("g").attr("class", "grid").selectAll("line").data(ticks).join("line")
+        .attr("x1", function (d) { return Math.round(x(d)) + 0.5; }).attr("x2", function (d) { return Math.round(x(d)) + 0.5; })
+        .attr("y1", 0).attr("y2", ih).attr("class", function (d) { return d === 0 ? "baseline" : null; });
+      g.append("g").selectAll("text").data(ticks).join("text").attr("class", "tick-label")
+        .attr("x", function (d) { return x(d); }).attr("y", ih + 18).attr("text-anchor", "middle")
+        .text(function (d, i) { return fmt(d) + (i === ticks.length - 1 ? " min" : ""); });
+      // linea dei 45 minuti
+      var l45 = g.append("g").attr("class", "anno");
+      l45.append("line").attr("class", "dash").attr("x1", x(45)).attr("x2", x(45)).attr("y1", -m.top + 2).attr("y2", ih);
+
+      var rows = g.selectAll("g.row").data(data).join("g").attr("class", "row")
+        .attr("transform", function (d, i) { return "translate(0," + (i * rh + rh / 2) + ")"; });
+      var dy = narrow ? 8 : 0;
+      if (narrow) {
+        var nt = rows.append("text").attr("x", -m.left).attr("y", -11);
+        nt.append("tspan").attr("class", "row-name").text(function (d) { return d.name; });
+        nt.append("tspan").attr("class", "row-sub").text(function (d) { return "  " + fmt(d.pop) + " abitanti"; });
+      } else {
+        rows.append("text").attr("class", "row-name").attr("x", -12).attr("y", 0).attr("dy", "0.35em").attr("text-anchor", "end").text(function (d) { return d.name; });
+      }
+      var link = rows.append("line").attr("y1", dy).attr("y2", dy).style("stroke", "var(--grey-4)").attr("stroke-width", 2).attr("stroke-linecap", "round");
+      R.enter(link, phase, function (s) { s.attr("x1", function (d) { return x(d.now); }).attr("x2", function (d) { return x(d.now); }); },
+        function (s) { s.attr("x1", function (d) { return x(d.now); }).attr("x2", function (d) { return x(d.nw); }); });
+      var cNow = rows.append("circle").attr("class", "mark").attr("cy", dy).attr("r", 5).attr("cx", function (d) { return x(d.now); })
+        .style("fill", "var(--blue)").style("stroke", "var(--bg)").attr("stroke-width", 1);
+      var cNew = rows.append("circle").attr("class", "mark").attr("cy", dy).attr("r", 5).style("fill", "var(--red)").style("stroke", "var(--bg)").attr("stroke-width", 1);
+      R.enter(cNew, phase, function (s) { s.attr("cx", function (d) { return x(d.now); }); }, function (s) { s.attr("cx", function (d) { return x(d.nw); }); });
+      var lab = rows.append("text").attr("class", "series-label").attr("y", dy).attr("dy", "0.35em");
+      lab.append("tspan").style("fill", "var(--red)").text(function (d) { return fmt(d.nw); });
+      lab.append("tspan").attr("class", "series-label--sub").text(function (d) { return " " + d.dNew; });
+      R.enter(lab, phase, function (s) { s.attr("x", function (d) { return x(d.now) + 10; }).style("opacity", 0); },
+        function (s) { s.attr("x", function (d) { return x(d.nw) + 10; }).style("opacity", 1); });
+      l45.append("text").attr("x", x(45) + 5).attr("y", -m.top + 12).attr("font-size", 12).text("45 min");
+
+      function act(ev, d) {
+        rows.selectAll(".mark").classed("is-dimmed", function () { return this.__data__ !== d; });
+        var p = d3.pointer(ev, host);
+        tip.show(R.tipHTML({ title: d.name, value: "+" + fmt(d.nw - d.now), unit: "minuti",
+          rows: [["Oggi", d.now === 0 ? "nel comune" : fmt(d.now) + " min, " + d.dNow], ["Dopo le chiusure", fmt(d.nw) + " min, " + d.dNew], ["Residenti", fmt(d.pop)]] }), p[0], p[1]);
+      }
+      clear = function () { rows.selectAll(".mark").classed("is-dimmed", false); };
+      rows.append("rect").attr("class", "hit").attr("x", -m.left).attr("y", -rh / 2).attr("width", W).attr("height", rh)
+        .on("pointermove pointerdown", act).on("pointerleave", function (ev) { if (ev.pointerType === "mouse") { tip.hide(); clear(); } });
+    });
+  }).catch(function (e) { R.fail("#chart", e); });
+})();
+</script>
+</body>
+</html>

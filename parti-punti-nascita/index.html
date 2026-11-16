@@ -14,8 +14,8 @@
 <body>
 <main class="radar">
   <header>
-    <h1 class="r-title">Un punto nascita su tre ha chiuso in quindici anni. Come i parti, calati di oltre un terzo</h1>
-    <p class="r-sub">Parti in ospedale e strutture che li registrano in Italia, 2010-2025</p>
+    <h1 class="r-title">Un ospedale con sala parto su tre in meno in quindici anni. Come i parti, calati di oltre un terzo</h1>
+    <p class="r-sub">Parti in ospedale e strutture ospedaliere con punto nascita in Italia, 2010-2025</p>
   </header>
 
   <div class="r-big" id="big" aria-hidden="true">
@@ -25,8 +25,8 @@
 
   <div class="r-panels">
     <figure class="r-chart" id="c-punti">
-      <p class="r-chart__head">Punti nascita</p>
-      <p class="r-chart__sub">Strutture ospedaliere</p>
+      <p class="r-chart__head">Strutture con punto nascita</p>
+      <p class="r-chart__sub">Un ospedale con più sedi conta una volta</p>
     </figure>
     <figure class="r-chart" id="c-parti">
       <p class="r-chart__head">Parti</p>
@@ -66,7 +66,7 @@
 
     // ---- Big number ----
     var bigNum = d3.select("#big-num");
-    d3.select("#big-label").text("punti nascita in meno dal " + first.year + " al " + last.year +
+    d3.select("#big-label").text("strutture con punto nascita in meno dal " + first.year + " al " + last.year +
       " (da " + fmt(first.punti) + " a " + fmt(last.punti) + ", −" + R.pct(pPunti) +
       "). I parti sono scesi del " + R.pct(pParti));
     var bigFmt = function (v) { return "−" + fmt(v, 0); };
@@ -76,9 +76,9 @@
       R.onFirstView(document.getElementById("big"), function () { R.countUp(bigNum, dPunti, bigFmt, "play"); });
     }
 
-    d3.select("#note").text("In media un punto nascita registrava " + fmt(first.ratio) + " parti nel " + first.year +
+    d3.select("#note").text("In media una struttura registrava " + fmt(first.ratio) + " parti nel " + first.year +
       " e " + fmt(last.ratio) + " nel " + last.year + ": la rete si è ridotta quasi allo stesso ritmo delle nascite. " +
-      "Punti nascita: strutture che hanno inviato i dati CeDAP; parti: schede CeDAP pervenute.");
+      "Strutture: ospedali che hanno inviato i dati CeDAP; un'azienda con più sedi conta una volta, per questo nel 2025 sono 347 a fronte di 382 punti nascita. Parti: schede CeDAP pervenute.");
 
     // ---- pannelli con crosshair condiviso ----
     var panels = [];
@@ -140,7 +140,7 @@
           var tw = Math.max(120, Math.min(200, w - ax + 4));
           var tx = Math.min(ax - 4, w - tw), ty = ay + 44;
           an.append("text").attr("x", tx).attr("y", ty).attr("dy", "0.7em")
-            .text("−" + fmt(drop.v) + " punti nascita in due anni, dal " + drop.from.year + " al " + drop.to.year)
+            .text("−" + fmt(drop.v) + " strutture in due anni, dal " + drop.from.year + " al " + drop.to.year)
             .call(R.wrap, tw);
           an.append("line").attr("x1", ax).attr("x2", ax).attr("y1", ay + 5).attr("y2", ty - 7);
           an.append("circle").attr("cx", ax).attr("cy", ay).attr("r", 2.25);
@@ -186,7 +186,7 @@
               title: String(d.year),
               value: fmt(d[key]),
               unit: opts.unit,
-              rows: [[opts.otherLabel, fmt(d[opts.other])], ["Parti per punto nascita", fmt(d.ratio)]],
+              rows: [[opts.otherLabel, fmt(d[opts.other])], ["Parti per struttura", fmt(d.ratio)]],
               note: d.note || null
             }), cx + m.left, cy + m.top);
           } else tip.hide();
@@ -208,12 +208,12 @@
     }
 
     panel("c-punti", "punti", {
-      div: 1, max: 600, step: 200, label: "Punti nascita in Italia", unit: "punti nascita",
+      div: 1, max: 600, step: 200, label: "Strutture con punto nascita in Italia", unit: "strutture",
       other: "parti", otherLabel: "Parti", short: function (v) { return fmt(v); }, anno: true, mr: 36
     });
     panel("c-parti", "parti", {
       div: 1000, max: 600, step: 200, label: "Parti in ospedale in Italia", unit: "parti",
-      other: "punti", otherLabel: "Punti nascita", short: function (v) { return fmt(v / 1000) + " mila"; }, mr: 62
+      other: "punti", otherLabel: "Strutture", short: function (v) { return fmt(v / 1000) + " mila"; }, mr: 62
     });
   }).catch(function (e) { R.fail("#c-punti", e); });
 })();

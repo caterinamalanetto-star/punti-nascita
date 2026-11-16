@@ -5,6 +5,7 @@
 | Meno nascite, meno ospedali (parti e punti nascita 2010-2025) | `parti-punti-nascita/` | `data/parti-punti-nascita.csv` |
 | Dove non si nasce più (mappa dei tempi verso il punto nascita) | `mappa-punti-nascita/` | `data/tempi-comuni.csv`, `data/punti-nascita-2024.csv`, `data/comuni.json`, `data/regioni.json` |
 | Quanto è lontano il primo parto (scenari e dieci territori) | `distanze-parto/` | `data/tempi-comuni.csv`, `data/territori.csv`, `data/punti-nascita-2024.csv` |
+| Senza Nottola e Campostaggia (provincia di Siena) | `siena-nottola/` | `data/siena-nottola.csv` |
 
 ## Fonti
 - Ministero della Salute, Rapporti CeDAP 2024 e 2025, tab. 1 (serie 2010-2025).
@@ -23,3 +24,5 @@
 - Codici dei comuni riallineati ai confini 2026 (fusioni, nuove province sarde) per nome e Regione.
 - 2017 (grafico 1): il file Excel del Ministero riporta 397 strutture, i rapporti PDF 399. Usato 399.
 - Geometrie semplificate su una griglia di 400 metri.
+- **Siena**: stesso calcolo per i 35 comuni della provincia togliendo i punti nascita di Montepulciano (Nottola) e Poggibonsi (Campostaggia); restano tutti gli altri, anche fuori regione (Orvieto, Arezzo).
+- Grafico 1: la serie CeDAP conta le strutture ospedaliere (un'azienda con più sedi conta una volta): 347 strutture nel 2025 a fronte di 382 punti nascita.
